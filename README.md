@@ -20,8 +20,7 @@
         android:layout_height="match_parent"/>
 
 实现普通列表只需要继承MRecyclerViewAdapter适配器并实现d对应的三个抽象方法即可：
-     .
-     .
+    
     /**
      * 创建itemHolder
      * @param parent
@@ -29,8 +28,8 @@
      * @return
      */
     protected abstract RecyclerView.ViewHolder createItemHolder(ViewGroup parent, int viewType);
-    .
-    .
+    
+    
    /**
      * 子类对item holder 的处理
      * 此处已经去除headerview数量  子类不需要处理
@@ -39,8 +38,8 @@
      * @param position 已经去除headerview的数量的索引
      */
     protected abstract void bindItemHolder(RecyclerView.ViewHolder holder, int position, int viewType);
-    .
-    .
+    
+    
    /**
      * 获取更多app item的逻辑
      *
