@@ -49,3 +49,7 @@
     protected abstract int getMoreData(List<Data> out, int startPosition, int requestSize);
     
     具体的参照demo就行
+
+    上次一次示例图（正在学习制作啊）：
+    ![](https://github.com/oneapp1e/MRecycleView-master/gif01.gif)
+
