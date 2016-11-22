@@ -1,0 +1,631 @@
+package com.mlr.adapter;
+
+import android.graphics.drawable.AnimationDrawable;
+import android.os.Looper;
+import android.support.v7.widget.RecyclerView;
+import android.util.SparseArray;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.mlr.holder.BaseHolder;
+import com.mlr.mrecyclerview.R;
+import com.mlr.mrecycleview.BaseActivity;
+import com.mlr.utils.ISpanSizeLookup;
+import com.mlr.utils.LogUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Vector;
+
+/**
+ * recyclerView列表适配器
+ * 可以使用addHeaderView
+ *
+ * @param <Data> 数据列表
+ */
+public abstract class MRecyclerViewAdapter<Data> extends AsyncLoadingAdapter implements ISpanSizeLookup, View.OnAttachStateChangeListener {
+    // ==========================================================================
+    // Constants
+    // ==========================================================================
+    /**
+     * headview的起始type
+     */
+    private static final int VIEW_TYPE_HEAD_VIEW_ONE = 1000;
+    // ==========================================================================
+    // Fields
+    // ==========================================================================
+    private List<Data> mItems;
+
+    private volatile boolean mHasMore;
+
+    private BaseActivity mActivity;
+    /**
+     * loadmore 之前是否需要阻塞
+     */
+    private volatile boolean mBlockLoadMore = false;
+
+    private TextView mBtnRefresh;
+
+    private LinearLayout mSpinnerBg;
+
+    private SparseArray<View> mHeaderViews = new SparseArray<>();
+
+    // ==========================================================================
+    // Constructors
+    // ==========================================================================
+    public MRecyclerViewAdapter(BaseActivity activity, List<? extends Data> items) {
+        super(activity);
+        mActivity = activity;
+        mItems = new ArrayList<>();
+        if (null != items) {
+            appendData(items);
+            if (items.size() < getIncrement()) {
+                mHasMore = false;
+                setMoreEnabled(false);
+            } else {
+                mHasMore = true;
+                setMoreEnabled(true);
+            }
+        }
+        // 初始化moreView，以解决请求数据线程比UI线程跑得更快时，刷新UI造成的mBtnRefresh等控件空指针异常
+        createMoreViewHolder(null, VIEW_TYPE_MORE);
+    }
+
+    // ==========================================================================
+    // Getters
+    // ==========================================================================
+    protected BaseActivity getActivity() {
+        return mActivity;
+    }
+
+    protected List<Data> getData() {
+        return mItems;
+    }
+
+    // ==========================================================================
+    // Setters
+    // ==========================================================================
+    protected void setHasMore(boolean hasMore) {
+        mHasMore = hasMore;
+    }
+
+    // ==========================================================================
+    // Methods
+    // ==========================================================================
+
+    /**
+     * 阻塞更多项的加载
+     */
+    private void blockLoadMore() {
+        mBlockLoadMore = true;
+    }
+
+    /**
+     * 取消对更多项加载的阻塞
+     */
+    private void unblockLoadMore() {
+        mBlockLoadMore = false;
+    }
+
+    public void refreshAll() {
+        if (Looper.getMainLooper() == Looper.myLooper()) {
+            // 调用在UI线程
+            notifyDataSetChanged();
+        } else {
+            // 调用在非UI线程
+            mActivity.post(new Runnable() {
+                @Override
+                public void run() {
+                    notifyDataSetChanged();
+                }
+            });
+        }
+    }
+
+    private boolean addUniqueItem(Data item) {
+        boolean duplicate = false;
+        for (int i = 0; i < mItems.size(); i++) {
+            if (isItemDuplicate(item, mItems.get(i))) {
+                duplicate = true;
+                break;
+            }
+        }
+        return !duplicate && mItems.add(item);
+    }
+
+    private int appendData(List<? extends Data> data2) {
+        if (null == data2) {
+            return 0;
+        }
+
+        /**
+         * 重新复制一份数据，避免发生ConcurrentModificationException异常
+         * liubin 2015-04-16
+         */
+        final List<? extends Data> data = new ArrayList<>(data2);
+
+        int addedCount = 0;
+        for (Data item : data) {
+            if (!filterItem(item) && addUniqueItem(item)) {
+                addedCount++;
+            }
+        }
+        return addedCount;
+    }
+
+    public final void setData(final List<? extends Data> data) {
+        if (Looper.getMainLooper() == Looper.myLooper()) {
+            // 调用在UI线程
+            setDataInner(data);
+        } else {
+            // 调用在非UI线程
+            mActivity.post(new Runnable() {
+
+                @Override
+                public void run() {
+                    setDataInner(data);
+                }
+
+            });
+        }
+    }
+
+    private void setDataInner(List<? extends Data> data) {
+        if (mItems != data) {
+            mItems.clear();
+            appendData(data);
+        }
+        int mLoadedCount = 0;
+        if (data != null) {
+            mLoadedCount = data.size();
+        }
+        if (mLoadedCount < getIncrement()) {
+            mHasMore = false;
+            setMoreEnabled(false);
+        } else {
+            mHasMore = true;
+            setMoreEnabled(true);
+        }
+        // init();
+        getActivity().refreshAdapterViewSafe(this);
+    }
+
+    public Object getItem(int position) {
+        if (position < 0 || position >= mItems.size()) {
+            return null;
+        }
+        return mItems.get(position);
+    }
+
+    private void clickRefresh() {
+        mBtnRefresh.setVisibility(View.GONE);
+        mSpinnerBg.setVisibility(View.VISIBLE);
+        unblockLoadMore();
+    }
+
+    @Override
+    public final int getCount() {
+        return mHeaderViews.size() + mItems.size();
+    }
+
+    @Override
+    protected final int getContentItemViewType(int position) {
+        if (mHeaderViews.size() > 0 && position < mHeaderViews.size()) {
+            return VIEW_TYPE_HEAD_VIEW_ONE + position;
+        }
+        //此处已经减去headerview数量  子类不需要处理
+        return getItemType(position - getHeaderCount());
+    }
+
+    /**
+     * 获取item的viewType
+     * 子类重写该方法
+     * 此处已经减去headerView数量  子类不需要处理
+     *
+     * @param position 已经减去headerView数量的索引
+     * @return viewType
+     */
+    protected int getItemType(int position) {
+        return VIEW_TYPE_ITEM;
+    }
+
+    @Override
+    protected final RecyclerView.ViewHolder createItemViewHolder(ViewGroup parent, int viewType) {
+        if (viewType >= VIEW_TYPE_HEAD_VIEW_ONE && viewType < VIEW_TYPE_HEAD_VIEW_ONE + mHeaderViews.size()) {
+            if (mHeaderViews.get(viewType) == null) {
+                throw new RuntimeException("HeaderView 为空了，请检查headerView的添加");
+            } else {
+                return new RecyclerView.ViewHolder(mHeaderViews.get(viewType)) {
+                };
+            }
+        }
+        return createItemHolder(parent, viewType);
+    }
+
+    protected abstract RecyclerView.ViewHolder createItemHolder(ViewGroup parent, int viewType);
+
+    @Override
+    protected final void bindItemViewHolder(RecyclerView.ViewHolder holder, int position, int viewType) {
+        if (viewType >= VIEW_TYPE_HEAD_VIEW_ONE && viewType < VIEW_TYPE_HEAD_VIEW_ONE + mHeaderViews.size()) {
+            //headerView不处理
+            LogUtils.v("bindItemViewHolder headerView不处理");
+        } else if (viewType == VIEW_TYPE_MORE || viewType == VIEW_TYPE_END) {
+            //更多 或者 底部到底了  不处理
+            LogUtils.v("bindItemViewHolder 更多 或者 底部到底了 不处理");
+        } else {
+            //此处已经去除headerview数量  子类不需要处理
+            bindItemHolder(holder, position - getHeaderCount(), viewType);
+        }
+    }
+
+    /**
+     * 子类对item holder 的处理
+     * 此处已经去除headerview数量  子类不需要处理
+     *
+     * @param holder   ViewHolder
+     * @param position 已经去除headerview的数量的索引
+     */
+    protected abstract void bindItemHolder(RecyclerView.ViewHolder holder, int position, int viewType);
+
+    @Override
+    public boolean hasMore() {
+        return mHasMore;
+    }
+
+    @Override
+    protected boolean readyForLoadMore(int startPosition, int requestSize) {
+        return !mBlockLoadMore;
+    }
+
+    @Override
+    protected int onLoadMore(int startPosition, int requestSize) {
+        LogUtils.e("mlr Req startPosition:" + startPosition + " requestSize:" + requestSize);
+        List<Data> moreItems = new Vector<>(requestSize);
+        int responseSize;
+        int addedCount = 0;
+        int statusCode = getMoreData(moreItems, startPosition, requestSize);
+        responseSize = moreItems.size();
+        if (responseSize > 0) {
+            addedCount = appendData(moreItems);
+        }
+        LogUtils.e("mlr Rsp responseSize:" + responseSize + " mItems.size():" + mItems.size());
+
+        if (responseSize >= requestSize || !isMoreLoaded(statusCode)) {
+            mHasMore = true;
+            if (!isMoreLoaded(statusCode)) {
+                getActivity().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        setMoreEnabled(mHasMore);
+                        mBtnRefresh.setVisibility(View.VISIBLE);
+                        mSpinnerBg.setVisibility(View.GONE);
+                        blockLoadMore();
+                    }
+                });
+            }
+        } else {
+            mHasMore = false;
+        }
+        return addedCount;
+    }
+
+    /**
+     * 根据状态码判断是否还需要加载
+     *
+     * @param statusCode statusCode
+     * @return boolean
+     */
+    protected boolean isMoreLoaded(int statusCode) {
+        //// TODO: 2016/11/10 根据状态码判断是否还需要加载  默认200
+        return statusCode == 200;
+    }
+
+    @Override
+    public final RecyclerView.ViewHolder createMoreViewHolder(ViewGroup parent, int viewType) {
+        View v = getActivity().inflate(R.layout.list_load_more, parent, false);
+        mBtnRefresh = (TextView) v.findViewById(R.id.btn_refresh);
+        mSpinnerBg = (LinearLayout) v.findViewById(R.id.relative_spinner_bg);
+        v.findViewById(R.id.drawable_loading).removeOnAttachStateChangeListener(this);
+        v.findViewById(R.id.drawable_loading).addOnAttachStateChangeListener(this);
+        return new RecyclerView.ViewHolder(v) {
+        };
+    }
+
+    @Override
+    protected final void bindMoreViewHolder(RecyclerView.ViewHolder holder, int position, int viewType) {
+
+        if (viewType == VIEW_TYPE_MORE) {
+            mBtnRefresh.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    clickRefresh();
+                }
+
+            });
+        }
+
+    }
+
+    /**
+     * 判断是否是重复项的逻辑。需要时重写。
+     */
+    protected boolean isItemDuplicate(Data item1, Data item2) {
+        return false;
+    }
+
+    /**
+     * 判断某个item是否需要被过滤掉。如果返回true，则该item不会被添加到列表数据源中。默认返回false。
+     *
+     * @param item data
+     * @return 需要被过滤返回true，否则返回false
+     */
+    protected boolean filterItem(Data item) {
+        return false;
+    }
+
+    /**
+     * 获取更多app item的逻辑
+     *
+     * @param out           得到的数据列表
+     * @param startPosition 起始位置
+     * @param requestSize   请求数量
+     * @return Status code
+     */
+    protected abstract int getMoreData(List<Data> out, int startPosition, int requestSize);
+
+    public void addHeaderView(View v) {
+        addHeaderView(v, -1);
+    }
+
+    /**
+     * 将headerView添加到第一个位置
+     *
+     * @param v 添加的eaderView
+     */
+    public void addFirstHeaderView(View v) {
+        addHeaderView(v, 0);
+    }
+
+    public void addHeaderView(View v, int index) {
+
+        if (v != null && mHeaderViews.indexOfValue(v) == -1) {
+            if (index <= -1 || index >= mHeaderViews.size()) {
+                mHeaderViews.put(VIEW_TYPE_HEAD_VIEW_ONE + mHeaderViews.size(), v);
+            } else {
+                SparseArray<View> tempHeaderViews = new SparseArray<>(mHeaderViews.size());
+                //克隆原来的数据
+                for (int i = 0; i < mHeaderViews.size(); i++) {
+                    tempHeaderViews.put(VIEW_TYPE_HEAD_VIEW_ONE + i, mHeaderViews.get(VIEW_TYPE_HEAD_VIEW_ONE + i));
+                }
+                //清空原来的数据 重新添加
+                mHeaderViews.clear();
+                //添加index之前的数据
+                for (int i = 0; i < index; i++) {
+                    mHeaderViews.put(VIEW_TYPE_HEAD_VIEW_ONE + i, tempHeaderViews.get(VIEW_TYPE_HEAD_VIEW_ONE + i));
+                }
+                //新增数据
+                mHeaderViews.put(VIEW_TYPE_HEAD_VIEW_ONE + index, v);
+                //添加index之后的数据
+                for (int i = index; i < tempHeaderViews.size(); i++) {
+                    mHeaderViews.put(VIEW_TYPE_HEAD_VIEW_ONE + i + 1, tempHeaderViews.get(VIEW_TYPE_HEAD_VIEW_ONE + i));
+                }
+            }
+        }
+    }
+
+    /**
+     * 移除headerView
+     *
+     * @param v 移除的headerView
+     */
+    public void removeHeaderView(View v) {
+        SparseArray<View> tempHeaderViews = new SparseArray<>(mHeaderViews.size());
+        //克隆原来的数据
+        for (int i = 0; i < mHeaderViews.size(); i++) {
+            tempHeaderViews.put(VIEW_TYPE_HEAD_VIEW_ONE + i, mHeaderViews.get(VIEW_TYPE_HEAD_VIEW_ONE + i));
+        }
+        //获取需要移除view的位置
+        int viewType = -1;
+        for (int i = 0; i < mHeaderViews.size(); i++) {
+            if (tempHeaderViews.get(VIEW_TYPE_HEAD_VIEW_ONE + i) == v) {
+                viewType = VIEW_TYPE_HEAD_VIEW_ONE + i;
+            }
+        }
+
+        //如果不存在 不进行处理
+        if (viewType == -1) {
+            return;
+        }
+
+        //移除数据
+        mHeaderViews.delete(viewType);
+
+        //添加index之后的数据
+        for (int i = viewType - VIEW_TYPE_HEAD_VIEW_ONE + 1; i < tempHeaderViews.size(); i++) {
+            mHeaderViews.put(VIEW_TYPE_HEAD_VIEW_ONE + i - 1, tempHeaderViews.get(VIEW_TYPE_HEAD_VIEW_ONE + i));
+        }
+        //删除最后一位数据
+        mHeaderViews.delete(VIEW_TYPE_HEAD_VIEW_ONE + tempHeaderViews.size() - 1);
+
+    }
+
+    /**
+     * 获取headerView的数量
+     *
+     * @return 数量
+     */
+    @Override
+    public int getHeaderCount() {
+        return mHeaderViews.size();
+    }
+
+    /**
+     * 获取一个单元格占原始单元格的倍数（不能大于一行的列数）
+     *
+     * @param position 位置
+     * @return
+     */
+    @Override
+    public final int getSpanSize2(int position) {
+        //判断如果是seciton 或者 更多 或者end
+        int viewType = getItemViewType(position);
+        if (viewType == VIEW_TYPE_MORE || viewType == VIEW_TYPE_END
+                || (viewType >= VIEW_TYPE_HEAD_VIEW_ONE && viewType < VIEW_TYPE_HEAD_VIEW_ONE + getHeaderCount())) {
+            //表示实际一个单元格是原单元格的n倍
+            return getSpanCount();
+        }
+        return getSpanSize(position - getHeaderCount(), viewType);
+    }
+
+    /**
+     * 获取一个单元格占原始单元格的倍数（不能大于一行的列数）
+     * 默认为1  子类需要处理就重写该方法
+     *
+     * @param position 已经去除headerview的数量的索引
+     * @param viewType viewType
+     * @return int
+     */
+    protected int getSpanSize(int position, int viewType) {
+        return 1;
+    }
+
+    @Override
+    public int getSpanCount() {
+        return 1;
+    }
+
+    /**
+     * SectionMRecyclerView 中有使用<br>
+     * 主要用于悬浮view只是sectionView的一部分<br>
+     * 如果使用的是SectionMRecyclerView 子类如果需要可以重写该方法控制sectionViewType的holder中view的显示隐藏
+     *
+     * @param firstSectionBelow sectionViewType对应的view
+     * @param visible           设置是否可见
+     */
+    public void setSectionHeaderVisible(View firstSectionBelow, int visible) {
+        if (null != firstSectionBelow && firstSectionBelow.getTag() instanceof BaseHolder) {
+            //注意设置tag这样就能取到对应的holder进行处理了
+        }
+    }
+
+    /**
+     * SectionMRecyclerView 中有使用<br>
+     * 子类必须重新改方法 设置SectionViewType
+     *
+     * @return int
+     */
+    public int getSectionViewType() {
+        return -1;
+    }
+
+    /**
+     * 是否启用滑动删除
+     *
+     * @return
+     */
+    public final boolean isItemViewSwipeEnabled2(int position) {
+        //判断如果是seciton 或者 更多 或者end
+        int viewType = getItemViewType(position);
+        if (viewType == VIEW_TYPE_MORE || viewType == VIEW_TYPE_END
+                || (viewType >= VIEW_TYPE_HEAD_VIEW_ONE && viewType < VIEW_TYPE_HEAD_VIEW_ONE + getHeaderCount())) {
+            return false;
+        }
+        return isItemViewSwipeEnabled(position - getHeaderCount());
+    }
+
+    /**
+     * 是否启用滑动删除 已经去除headerCount的position
+     * 子类可以重写该方法
+     *
+     * @return
+     */
+    public boolean isItemViewSwipeEnabled(int position) {
+        return false;
+    }
+
+    /**
+     * 移除item
+     *
+     * @param position 位置
+     */
+    public void onItemDismiss(int position) {
+        mItems.remove(position - getHeaderCount());
+        notifyItemRemoved(position);
+        getActivity().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        }, 200);
+    }
+
+
+    /**
+     * 是否启用长按拖拽
+     *
+     * @return
+     */
+    public final boolean isLongPressDragEnabled2(int position) {
+        //判断如果是seciton 或者 更多 或者end
+        int viewType = getItemViewType(position);
+        if (viewType == VIEW_TYPE_MORE || viewType == VIEW_TYPE_END
+                || (viewType >= VIEW_TYPE_HEAD_VIEW_ONE && viewType < VIEW_TYPE_HEAD_VIEW_ONE + getHeaderCount())) {
+            return false;
+        } else {
+            return isLongPressDragEnabled(position - getHeaderCount());
+        }
+    }
+
+    /**
+     * 是否启用长按拖拽 已经去除headerCount的position
+     * 子类可以重写该方法
+     */
+    public boolean isLongPressDragEnabled(int position) {
+        return false;
+    }
+
+    /**
+     * 移动item
+     *
+     * @param from 起始位置
+     * @param to   结束位置
+     */
+    public void onItemMoved(int from, int to) {
+        LogUtils.e("mlr onItemMoved from:" + from + "  to:" + to + "  mItems.size():" + mItems.size());
+        //如果适配器索引值大于数据集合的索引值 说明子类有其他处理 那么此处不进行移动  子类可以重新该方法
+        if (from > getCount() - 1 || to > getCount() - 1) {
+            return;
+        }
+        Collections.swap(mItems, from - getHeaderCount(), to - getHeaderCount());
+        notifyItemMoved(from, to);
+    }
+
+    /**
+     * 移动item完成，动画结束，需要更新一下数据.</br>
+     * 否则会造成onClick方法里面position没有更新获取的数据不对
+     */
+    public void clearView() {
+        notifyDataSetChanged();
+    }
+
+
+    @Override
+    public void onViewAttachedToWindow(View view) {
+        ((AnimationDrawable) (((ImageView) view).getDrawable())).start();
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(View view) {
+        view.removeOnAttachStateChangeListener(this);
+    }
+
+    // ==========================================================================
+    // Inner/Nested Classes
+    // ==========================================================================
+}

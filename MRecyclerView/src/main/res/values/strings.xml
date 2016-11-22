@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">MRecycleView</string>
+    <string name="loading">加载中</string>
+    <string name="update_refresh_state_tip_pull">下拉刷新</string>
+    <string name="update_refresh_state_tip_release">释放刷新</string>
+    <string name="update_refresh_state_tip_refreshing">加载中</string>
+    <string name="list_offline_text">未获取到数据，请点击重试</string>
+    <string name="list_overscroll_tips">~到底儿了~</string>
+    <string name="update_refresh_date">上次刷新：%s</string>
+    <string name="update_refresh_date_none">无</string>
+    <string name="update_refresh_date_recently">刚刚</string>
+    <string name="update_refresh_date_within_halfhour">半小时前</string>
+    <string name="update_refresh_date_day_more">1天前</string>
+    <string name="update_refresh_date_within_minute">%1$d秒前</string>
+    <string name="update_refresh_date_within_hour">%1$d分钟前</string>
+    <string name="update_refresh_date_within_day">%1$d小时前</string>
+    <string name="update_refresh_date_within_week">%1$d天前</string>
+    <string name="update_refresh_date_within_month">%1$d周前</string>
+    <string name="update_refresh_date_within_year">%1$d月前</string>
+    <string name="update_refresh_date_more_year">%1$d年前</string>
+    <string name="update_refresh_date_yesterday">昨天%1$s</string>
+    <string name="update_refresh_date_before_yesterday">前天%1$s</string>
+</resources>

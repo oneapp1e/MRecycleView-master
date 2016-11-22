@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.mlr.demo">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+    >
+        <activity android:name="com.mlr.demo.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name="com.mlr.demo.CommonListActivity"/>
+        <activity android:name="com.mlr.demo.HorizontalCommonListActivity"/>
+        <activity android:name="com.mlr.demo.CommonGridActivity"/>
+        <activity android:name="com.mlr.demo.HorizontalCommonGridActivity"/>
+        <activity android:name="com.mlr.demo.MixListGridActivity"/>
+        <activity android:name="com.mlr.demo.SectionListActivity"/>
+        <activity android:name="com.mlr.demo.SectionGridActivity"/>
+        <activity android:name="com.mlr.demo.DragMoveListActivity"/>
+        <activity android:name="com.mlr.demo.DragMoveGridActivity"/>
+    </application>
+
+</manifest>

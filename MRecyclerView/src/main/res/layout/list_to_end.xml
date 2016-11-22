@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="@dimen/list_to_end_height"
+    android:gravity="center" >
+
+    <!-- FIXME 为实现悬浮框效果（设置padding bottom）多加一层layout 并用padding替换margin -->
+
+    <View
+        android:id="@+id/list_to_end_line"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/divider"
+        android:visibility="gone"/>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingBottom="10dip"
+        android:paddingTop="10dip" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/list_overscroll_tips"
+            android:textColor="#b2b2b2"
+            android:textSize="15dip" />
+    </RelativeLayout>
+
+</RelativeLayout>

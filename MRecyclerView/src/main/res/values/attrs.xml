@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MRecyclerView">
+        <attr name="orientation">
+            <flag name="HORIZONTAL" value="0" />
+            <flag name="VERTICAL" value="1" />
+        </attr>
+    </declare-styleable>
+</resources>

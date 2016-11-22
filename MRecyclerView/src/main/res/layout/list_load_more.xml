@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:gravity="center">
+
+    <LinearLayout
+        android:id="@+id/relative_spinner_bg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/bg_loading"
+        android:paddingLeft="25dip"
+        android:paddingRight="25dip">
+
+        <TextView
+            android:id="@+id/txt_loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="5dip"
+            android:text="@string/loading"
+            android:textColor="#ffffff"
+            android:textSize="@dimen/size_F2"/>
+
+        <ImageView
+            android:id="@+id/drawable_loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/splash_loading"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/btn_refresh"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:text="@string/list_offline_text"
+        android:textColor="@color/update_push_header_txt_color"
+        android:textSize="@dimen/size_F2"
+        android:visibility="gone"/>
+
+</RelativeLayout>

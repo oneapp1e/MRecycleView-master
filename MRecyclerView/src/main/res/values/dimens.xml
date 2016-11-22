@@ -1,0 +1,13 @@
+<resources>
+    <!-- 项目常规字号大小 size_F1一般是标题使用（各个列表页的标题）-->
+    <dimen name="size_F1">13dp</dimen>
+    <!--内容字号-->
+    <dimen name="size_F2">14dp</dimen>
+    <!--不重要的展示信息字号：时间、评论数、点赞数等-->
+    <dimen name="size_F3">15dp</dimen>
+
+    <dimen name="no_more_margin_top">10dip</dimen>
+    <dimen name="update_pull_refresh_height">47dip</dimen>
+    <!-- 到底儿了视图高度 -->
+    <dimen name="list_to_end_height">40dip</dimen>
+</resources>
