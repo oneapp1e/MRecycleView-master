@@ -247,6 +247,12 @@ public abstract class MRecyclerViewAdapter<Data> extends AsyncLoadingAdapter imp
         return createItemHolder(parent, viewType);
     }
 
+    /**
+     * 创建itemHolder
+     * @param parent
+     * @param viewType
+     * @return
+     */
     protected abstract RecyclerView.ViewHolder createItemHolder(ViewGroup parent, int viewType);
 
     @Override
