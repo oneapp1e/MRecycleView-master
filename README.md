@@ -64,7 +64,7 @@
     
 具体的参照demo就行
 
-上次一次示例图（正在学习制作啊）：
+上传一个示例图（正在学习制作啊）：
     ![gif](https://github.com/oneapp1e/MRecycleView-master/blob/master/gif01.gif)
 
 
