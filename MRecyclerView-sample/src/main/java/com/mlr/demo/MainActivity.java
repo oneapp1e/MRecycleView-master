@@ -101,5 +101,14 @@ public class MainActivity extends BaseActivity {
                 startActivity(intent);
             }
         });
+
+        View btnPullToRefreshListView = findViewById(R.id.btn_pull_to_refresh_list);
+        btnPullToRefreshListView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, PullToRefreshListActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }

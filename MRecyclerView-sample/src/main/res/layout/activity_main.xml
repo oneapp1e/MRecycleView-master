@@ -71,5 +71,12 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/activity_horizontal_margin"
             android:text="拖拽和移动GridView"/>
+
+        <Button
+            android:id="@+id/btn_pull_to_refresh_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
+            android:text="PullToRefreshListView"/>
     </LinearLayout>
 </ScrollView>

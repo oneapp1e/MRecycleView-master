@@ -26,6 +26,7 @@
         <activity android:name="com.mlr.demo.SectionGridActivity"/>
         <activity android:name="com.mlr.demo.DragMoveListActivity"/>
         <activity android:name="com.mlr.demo.DragMoveGridActivity"/>
+        <activity android:name="com.mlr.demo.PullToRefreshListActivity"/>
     </application>
 
 </manifest>

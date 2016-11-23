@@ -4,32 +4,30 @@ package com.mlr.utils;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v4.view.NestedScrollingChildHelper;
+import android.support.v4.view.NestedScrollingParent;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.mlr.adapter.AsyncLoadingAdapter;
 import com.mlr.adapter.MRecyclerViewAdapter;
+import com.mlr.mrecyclerview.MRecyclerView;
 import com.mlr.mrecyclerview.R;
 
 
 /**
  * 注意：必须在初始化之前使用RecyclerView的setAdapter方法设置适配器,
  */
-public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
+public class PullToRefreshRecyclerViewWrapper extends RelativeLayout implements NestedScrollingParent {
     // ==========================================================================
     // Constants
     // ==========================================================================
@@ -58,22 +56,16 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
     static final String STATE_SHOW_REFRESHING_VIEW = "ptr_show_refreshing_view";
     static final String STATE_SUPER = "ptr_super";
 
-    // 动画插入器
-    static final Interpolator ANIMATION_INTERPOLATOR = new LinearInterpolator();
     // ==========================================================================
     // Fields
     // ==========================================================================
     private Context mContext;
-    // 最小的拖动距离
-    private int mTouchSlop;
-    // 最后一次的x、y值
-    private float mLastMotionX, mLastMotionY;
-    // 初始的y值
-    private float mInitialMotionY;
-    private boolean mFilterTouchEvents = true;// 是否过滤手势事件，过滤的条件是如果：例如上下刷新，而水平的距离大于垂直的距离，则不刷新
+
+    private int mNestedScrollValue;// RecyclerView滑动到头后导致的下拉
 
     // 用于被包装的View，使该View具备弹性或者拉动刷新
-    private RecyclerView mRefreshableView;
+    private MRecyclerView mRefreshableView;
+    private MRecyclerViewAdapter mAdapter;
     // 用于展示下拉刷新的View
     private BasePullToRefreshLoadingView mHeaderLayout;
     private View mFooterView;// 数据加载完后，再向上拉时，显示“到底了”
@@ -96,25 +88,19 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
     private boolean mListViewExtrasEnabled = true;
 
     private BasePullToRefreshLoadingView mHeaderLoadingView;
-    // 刷新完毕后，是否回到第一个
-    private boolean mToFirstOnComplete = false;
+
     private int mFootMargin;// 用于首页底部到底了效果视图向上调整间距
 
     /**
      * 最后一次更新数据的时间，用于显示多长时间前更新的功能
      */
     private long mLastUpdatedTime;
-
     /**
      * 当前刷新模式 默认不可刷新
      */
     private Mode mMode = Mode.DISABLED;
 
-    private LinearLayoutManager mLayoutManager;
-
-    private RecyclerView.Adapter mAdapter;
-
-    private TouchEventInterceptor mTouchEventInterceptor;
+    private NestedScrollingChildHelper mNestedScrollingChildHelper;
 
     // ==========================================================================
     // Constructors
@@ -123,18 +109,20 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
     /**
      * 构造方法
      *
-     * @param context
+     * @param context         context
      * @param refreshableView 需要被包装为下拉刷新的ListView
      */
-    public PullToRefreshRecyclerViewWrapper(Context context, RecyclerView refreshableView) {
+    public PullToRefreshRecyclerViewWrapper(Context context, MRecyclerView refreshableView) {
         this(context, refreshableView, 0);
     }
 
-    public PullToRefreshRecyclerViewWrapper(Context context, RecyclerView refreshableView, int footMargin) {
+    public PullToRefreshRecyclerViewWrapper(Context context, MRecyclerView refreshableView, int footMargin) {
         super(context);
         mContext = context;
         mRefreshableView = refreshableView;
         mFootMargin = footMargin;
+        mNestedScrollingChildHelper = new NestedScrollingChildHelper(this);
+        mNestedScrollingChildHelper.setNestedScrollingEnabled(true);
         init();
     }
 
@@ -155,23 +143,22 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
     /**
      * 设置最后更新时间
      */
-    @Deprecated //这个方法支持自动设置
-    public void setLastUpdatedLabel(String label) {
+    private void setLastUpdatedLabel(String label) {
         mHeaderLayout.setLastUpdatedText(label);
-    }
-
-    /**
-     * 设置最后更新时间
-     */
-    public void setLastUpdatedTime(long time) {
-        this.mLastUpdatedTime = time;
     }
 
     /**
      * 更新最后更新数据的时间
      */
-    public void refreshLastUpdatedTime() {
+    private void refreshLastUpdatedTime() {
         this.mLastUpdatedTime = System.currentTimeMillis();
+    }
+
+    private String getLastUpdatedTimeText() {
+        long time = mLastUpdatedTime;
+        String label = getContext().getResources().getString(R.string.update_refresh_date,
+                StringFormatUtils.formatPullToRefreshTime(mContext, time));
+        return label;
     }
 
     /**
@@ -191,16 +178,6 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
         }
     }
 
-    /**
-     * 设置下拉刷屏View的高度
-     */
-    private void setHeaderHeight(int height) {
-        mHeaderLayout.setHeight(height);
-        if (mHeaderLoadingView != null) {
-            mHeaderLoadingView.setHeight(height);
-        }
-    }
-
     // ==========================================================================
     // Methods
     // ==========================================================================
@@ -210,18 +187,13 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
      */
     private void init() {
         setGravity(Gravity.CENTER);
-        ViewConfiguration config = ViewConfiguration.get(mContext);
-        mTouchSlop = config.getScaledTouchSlop();
+        refreshLastUpdatedTime();
 
         mHeaderLayout = createHeaderLayout();
-        RecyclerView.LayoutManager layoutManager = mRefreshableView.getLayoutManager();
-        if (layoutManager instanceof LinearLayoutManager) {
-            mLayoutManager = (LinearLayoutManager) layoutManager;
-        }
 
         mAdapter = mRefreshableView.getAdapter();
         //判断如果是listview适配器 则使用addheaderView扩展
-        if (mAdapter != null && mAdapter instanceof MRecyclerViewAdapter) {
+        if (mAdapter != null) {
             mListViewExtrasEnabled = true;
         } else {
             mListViewExtrasEnabled = false;
@@ -237,7 +209,7 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
             frame.addView(mHeaderLoadingView, lp);
             frame.setBackgroundColor(getContext().getResources().getColor(R.color.title_text_color_gray));
             frame.setLayoutParams(lp);
-            ((MRecyclerViewAdapter) mAdapter).addFirstHeaderView(frame);
+            mAdapter.addFirstHeaderView(frame);
         }
 
         // 禁止ListView自身的上滑
@@ -292,19 +264,19 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
      */
     protected void updateUI() {
         // 我们需要使用正确的LayoutParam值
-        LayoutParams lp;
+        RelativeLayout.LayoutParams lp;
         int height = getContext().getResources().getDimensionPixelSize(R.dimen.update_pull_refresh_height);
-        lp = new LayoutParams(LayoutParams.MATCH_PARENT, height);
-        // 先移除，再添加 ROB 不明白为什么先移除
+        lp = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, height);
+        // 先移除，再添加
         if (this == mHeaderLayout.getParent()) {
             removeView(mHeaderLayout);
         }
         addView(mHeaderLayout, lp);
 
-        lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        lp = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         addView(mFooterView, lp);
 
-        lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        lp = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         addView(mRefreshableView, lp);
 
         refreshLoadingViewsSize();
@@ -317,17 +289,15 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
         final int maximumPullScroll = (int) (getMaxPullScroll() * 1.2f);
 
         int pLeft = getPaddingLeft();
-        int pTop = getPaddingTop();
         int pRight = getPaddingRight();
-        int pBottom = getPaddingBottom();
         mHeaderLayout.setHeight(maximumPullScroll);// 设置header的高度
-        pTop = -maximumPullScroll;// paddingTop设置为负数，让其底部和界面顶部对齐，以便下拉
-        pBottom = 0;
+        int pTop = -maximumPullScroll;// paddingTop设置为负数，让其底部和界面顶部对齐，以便下拉
+        int pBottom = 0;
         setPadding(pLeft, pTop, pRight, pBottom);
     }
 
     // 重新设置ListView的高度
-    public final void refreshRefreshableViewSize(int width, final int height) {
+    private void refreshRefreshableViewSize(int width, final int height) {
         ViewGroup.LayoutParams layoutParams = mRefreshableView.getLayoutParams();
         if (layoutParams == null) {
             layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -354,29 +324,18 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
 
     /**
      * 是否可以下拉
-     * 这个方法用于被包装的View来判断是否可以下拉刷新，例如listView的条件就是第一个可见的是0或者1，因为有headerview的存在，并且还要判断0角标位的子View的top大于或者等于listView的top，
-     * 才算是真正的可以下拉刷新
+     * 这个方法用于被包装的View来判断是否可以下拉刷新
      */
     protected boolean isReadyForPullDown() {
-
         if (mMode == Mode.DISABLED || mMode == Mode.PULL_FROM_END) {
             return false;
         }
 
-        if (null == mAdapter) {
+        if (mRefreshableView.getChildCount() <= 0) {
             return true;
         }
-        /** 检查第一个item的position是否为0，但是ListView有headerview，会造成混乱，所以我们根据角标0位置top进行比较 */
-        if (mLayoutManager != null) {
-            if (mLayoutManager.findFirstVisibleItemPosition() <= 1) {
-                final View firstVisibleChild = mRefreshableView.getChildAt(0);
-                if (firstVisibleChild != null) {
-                    return firstVisibleChild.getTop() >= mRefreshableView.getTop();
-                }
-            }
-        }
-
-        return false;
+        int firstVisiblePosition = mRefreshableView.getChildPosition(mRefreshableView.getChildAt(0));
+        return firstVisiblePosition == 0 && mRefreshableView.getChildAt(0).getTop() == mRefreshableView.getPaddingTop();
     }
 
     // 判断是否可以向上拉
@@ -389,161 +348,38 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
             return false;
         }
         // 如果是AsyncLoadingAdapter适配器，存在异步加载的情况，需要做判断
-        if (mAdapter instanceof AsyncLoadingAdapter) {
-            AsyncLoadingAdapter adapter2 = (AsyncLoadingAdapter) mAdapter;
-            if (adapter2.hasMore()) {
-                return false;
-            }
-        }
-
-        int count = mAdapter.getItemCount();
-        if (mLayoutManager != null) {
-            int position = mLayoutManager.findLastVisibleItemPosition();
-            return (count - 1) == position && mRefreshableView.getChildAt(mRefreshableView.getChildCount() - 1)
-                    .getBottom() + mRefreshableView.getPaddingBottom() == mRefreshableView.getHeight();
-        }
-
-        return false;
-    }
-
-    /**
-     * 手势拦截
-     */
-    public final boolean onInterceptTouchEvent(MotionEvent event) {
-        final int action = event.getAction();// 获取当前的状态
-        if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {// 如果是cancel或者up
-            mDraggingMode = DRAG_MODE_NONE;// 拖拽结束
-            return false;// 不拦截
-        }
-
-        if (mTouchEventInterceptor != null && mTouchEventInterceptor.intercepted(event)) {
+        if (mAdapter.hasMore()) {
             return false;
         }
+        return mRefreshableView.getChildAt(mRefreshableView.getChildCount() - 1)
+                .getBottom() + mRefreshableView.getPaddingBottom() == mRefreshableView.getHeight();
 
-        if (action != MotionEvent.ACTION_DOWN && isBeingDragged()) {// 如果action不等于down，并且是拖拽的，拦截
-            return true;
-        }
-        boolean handled = false;
-
-        switch (action) {
-            case MotionEvent.ACTION_MOVE: {
-                // 正在刷新，并且刷新的时候不能滑动，直接返回true
-                if (!mScrollingWhileRefreshingEnabled && isRefreshing()) {
-                    return true;
-                }
-                // 如果可以下拉刷新了
-                if (isReadyForPullDown() || isReadyForPullUp()) {
-                    final float y = event.getY(), x = event.getX();
-                    final float diff, oppositeDiff, absDiff;
-
-                    diff = y - mLastMotionY;// 则只计算y差距
-                    oppositeDiff = x - mLastMotionX;// 计算x差距
-
-                    absDiff = Math.abs(diff);// 取绝对值
-                    // 如果滑动距离大于最小滑动距离，并且不过滤手势事件，或者说过滤，但是正确的方向上移动的距离比不正确的方向上移动的距离要大
-                    // 即纵向的距离比横向的距离要大
-                    if (absDiff > mTouchSlop && (!mFilterTouchEvents || absDiff > Math.abs(oppositeDiff))) {
-                        if (diff > 0 && isReadyForPullDown()) {// 下拉操作
-                            mDraggingMode = DRAG_MODE_DOWN;
-                        } else if (diff < 0 && isReadyForPullUp()) {// 上拉操作
-                            mDraggingMode = DRAG_MODE_UP;
-                        } else {
-                            mDraggingMode = DRAG_MODE_NONE;
-                        }
-
-                        if (mDraggingMode == DRAG_MODE_NONE) {
-                            handled = false;
-                        } else {
-                            mLastMotionY = y;// x和y进行赋值
-                            mLastMotionX = x;
-                            handled = true;// 拖动状态
-                        }
-                    }
-                }
-                break;
-            }
-            case MotionEvent.ACTION_DOWN: {
-                if (isReadyForPullDown() || isReadyForPullUp()) {// 如果即将开始，则赋初始值
-                    mLastMotionY = mInitialMotionY = event.getY();
-                    mLastMotionX = event.getX();
-                    handled = false;
-                }
-                break;
-            }
-        }
-        return handled;// 是否拦截根据是否拖动来决定
     }
 
-    public final boolean onTouchEvent(MotionEvent event) {
-        // 正在刷新，并且刷新的时候不能滑动，直接返回true
-        if (!mScrollingWhileRefreshingEnabled && isRefreshing()) {
-            return true;
-        }
-        // 如果是down事件，并且处于控件的边缘，则不处理
-        if (event.getAction() == MotionEvent.ACTION_DOWN && event.getEdgeFlags() != 0) {
-            return false;
-        }
-
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_MOVE: {// move事件
-                if (isBeingDragged()) {// 正处于拖动
-                    mLastMotionY = event.getY();// 赋值
-                    mLastMotionX = event.getX();
-                    // 如果可以不是固定的View或者是固定的View，但是不处于刷新状态，可以执行下拉刷新
-                    if (mDraggingMode == DRAG_MODE_DOWN && (mListViewExtrasEnabled || !isRefreshing())) {
-                        pullDownEvent();
-                    } else if (mDraggingMode == DRAG_MODE_UP) {
-                        pullUpEvent();
-                    }
-                    return true;
-                }
-                break;
+    private boolean handleActionUp() {
+        if (mDraggingMode == DRAG_MODE_DOWN) {// 下拉离开
+            mDraggingMode = DRAG_MODE_NONE;
+            // 判断状态为释放刷新，且有监听者，则把状态设置为刷新中
+            if (mState == STATE_RELEASE_TO_REFRESH && (null != mOnRefreshListener)) {
+                setState(STATE_REFRESHING, true);
+                return true;
             }
-
-            case MotionEvent.ACTION_DOWN: {// down事件
-                if (isReadyForPullDown() || isReadyForPullUp()) {// 赋初始值和最后的值
-                    mLastMotionY = mInitialMotionY = event.getY();
-                    mLastMotionX = event.getX();
-                    return true;
-                }
-                break;
-            }
-
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_UP:
-                if (mDraggingMode == DRAG_MODE_DOWN) {// 下拉离开
-                    mDraggingMode = DRAG_MODE_NONE;
-                    // 判断状态为释放刷新，且有监听者，则把状态设置为刷新中
-                    if (mState == STATE_RELEASE_TO_REFRESH && (null != mOnRefreshListener)) {
-                        setState(STATE_REFRESHING, true);
-                        return true;
-                    }
-                    // 如果已经处于刷新阶段，移动到顶端
-                    if (isRefreshing()) {
-                        if (mListViewExtrasEnabled) {// 如果可以随手指移动到顶端
-                            smoothScrollTo(0);
-                        }
-                        return true;
-                    }
-                    // 重置状态
-                    setState(STATE_RESET);
-                    return true;
-                } else if (mDraggingMode == DRAG_MODE_UP) {// 上拉离开
-                    mDraggingMode = DRAG_MODE_NONE;
+            // 如果已经处于刷新阶段，移动到顶端
+            if (isRefreshing()) {
+                if (mListViewExtrasEnabled) {// 如果可以随手指移动到顶端
                     smoothScrollTo(0);
-                    return true;
                 }
-                break;
-
+                return true;
+            }
+            // 重置状态
+            setState(STATE_RESET);
+            return true;
+        } else if (mDraggingMode == DRAG_MODE_UP) {// 上拉离开
+            mDraggingMode = DRAG_MODE_NONE;
+            smoothScrollTo(0);
+            return true;
         }
         return false;
-    }
-
-    /**
-     * 完成刷新
-     */
-    public final void onRefreshComplete() {
-        onRefreshComplete(true);
     }
 
     /**
@@ -556,15 +392,12 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
             refreshLastUpdatedTime();
         }
 
-        if (isRefreshing()) {
-            setState(STATE_RESET);
-        }
+        setState(STATE_RESET);
+
         if (toFirstOnComplete()) {// 刷新完毕后，是否要回复到第一个item
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    //TODO setSelected 此处暂时注释 不知道为什么要设置setSelected(true) 这样recycleView会向下传递给子view造成item被选中
-//                    mRefreshableView.setSelected(true);
                     mRefreshableView.scrollToPosition(0);
                 }
             }, SMOOTH_SCROLL_DURATION_MS * 2);
@@ -618,30 +451,18 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
 
             }
         }
-        return mToFirstOnComplete;
-    }
-
-    /**
-     * 手动设置为刷新
-     */
-    public final void setRefreshing() {
-        if (!isRefreshing()) {
-            setState(STATE_MANUAL_REFRESHING, false);
-        }
+        return false;
     }
 
     /**
      * 执行下拉
      */
-    private void pullDownEvent() {
-        final int newScrollValue;
+    private void pullDownEvent(float newScrollValue2) {
+        final int newScrollValue = Math.round(Math.min(newScrollValue2, 0) / FRICTION);
         final int itemDimension;
-        final float initialMotionValue, lastMotionValue;
-        initialMotionValue = mInitialMotionY;// 手指按下的初始值
-        lastMotionValue = mLastMotionY;// 当前手指的位置
-        newScrollValue = Math.round(Math.min(initialMotionValue - lastMotionValue, 0) / FRICTION);
         itemDimension = getHeaderSize();
         setHeaderScroll(newScrollValue);
+
         if (newScrollValue != 0 && !isRefreshing()) {
             /*
              * 如果在数据刚加载出来的时间，快速向下滑动，此时mState的值是STATE_RESET，mInitialMotionY和mLastMotionY的差值的绝对值会
@@ -657,13 +478,9 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
     }
 
     // 执行上拉操作
-    private void pullUpEvent() {
-        final int newScrollValue;
-        final float initialMotionValue, lastMotionValue;
-        initialMotionValue = mInitialMotionY;// 手指按下的初始值
-        lastMotionValue = mLastMotionY;// 当前手指的位置
-        newScrollValue = Math.round(Math.max(initialMotionValue - lastMotionValue, 0) / FRICTION);
-        scrollTo(0, newScrollValue);
+    private void pullUpEvent(float newScrollValue) {
+        newScrollValue = Math.round(Math.max(newScrollValue, 0) / FRICTION);
+        scrollTo(0, (int) newScrollValue);
     }
 
     /**
@@ -695,10 +512,7 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
 
         // 处理多久前更新的功能
         if (mState == STATE_RESET && state == STATE_PULL_TO_REFRESH && mLastUpdatedTime > 0) {
-            long time = mLastUpdatedTime;
-            String label = getContext().getResources().getString(R.string.update_refresh_date,
-                    StringFormatUtils.formatPullToRefreshTime(getContext(), time));
-            setLastUpdatedLabel(label);
+            setLastUpdatedLabel(getLastUpdatedTimeText());
         }
 
         mState = state;
@@ -722,11 +536,7 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
         scrollToHeight = -getHeaderSize();// 计算出header的高度
         selection = 0;
 
-        if (mLayoutManager != null) {
-            scrollLvToEdge = Math.abs(mLayoutManager.findFirstVisibleItemPosition() - selection) <= 1;
-        } else {
-            scrollLvToEdge = Math.abs(0 - selection) <= 1;
-        }
+        scrollLvToEdge = Math.abs(mRefreshableView.getLayoutManager().findFirstVisibleItemPosition() - selection) <= 1;
 
         if (listViewLoadingLayout.getVisibility() == View.VISIBLE) {
             // 让原始的View可见
@@ -813,15 +623,6 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
         }
     }
 
-    /**
-     * 判断当前是否处于拖拽模式
-     *
-     * @return ture 处于拖拽模式;false 没有处于拖拽模式
-     * @note 这个方法无法判断是下拉还是上拉
-     */
-    private boolean isBeingDragged() {
-        return mDraggingMode == DRAG_MODE_DOWN || mDraggingMode == DRAG_MODE_UP;
-    }
 
     /**
      * 刷新中
@@ -868,12 +669,18 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
      * @return
      */
     private boolean isNetworkDisabled() {
-        //todo 判断 是否有网络 如果没有网络提示没有 调用刷新完成方法
-        // if( ){
-        // Toast.makeText();
-        //  onRefreshComplete();
-        // return true;
-        //  }
+        //// TODO: 2016/11/23 如果网络不可用的处理逻辑
+//        if (BBSApplication.isNetworkDisabled()) {
+//            postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    String msg = getContext().getResources().getString(R.string.connect_internet_error);
+//                    BBSApplication.getApplication().showToastSafe(msg, Toast.LENGTH_SHORT);
+//                    onRefreshComplete();
+//                }
+//            }, 1000);
+//            return true;
+//        }
         return false;
     }
 
@@ -953,15 +760,15 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
     /**
      * 移动动画
      */
-    private final void smoothScrollTo(int scrollValue, long duration) {
+    private void smoothScrollTo(int scrollValue, long duration) {
         smoothScrollTo(scrollValue, duration, 0, null);
     }
 
     /**
      * 移动动画
      */
-    private final void smoothScrollTo(int newScrollValue, long duration, long delayMillis,
-                                      OnSmoothScrollFinishedListener listener) {
+    private void smoothScrollTo(int newScrollValue, long duration, long delayMillis,
+                                OnSmoothScrollFinishedListener listener) {
         if (null != mCurrentSmoothScrollRunnable) {// 停止之前的任务
             mCurrentSmoothScrollRunnable.stop();
         }
@@ -991,13 +798,13 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
     /**
      * 设置刷新模式
      *
-     * @param mode
+     * @param mode mode
      */
     public void setPullToRefreshMode(Mode mode) {
         this.mMode = mode;
     }
 
-    public static enum Mode {
+    public enum Mode {
 
         /**
          * Disable all Pull-to-Refresh gesture and Refreshing handling
@@ -1023,23 +830,106 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
 
     }
 
-    public void setTouchEventInterceptor(TouchEventInterceptor interceptor) {
-        this.mTouchEventInterceptor = interceptor;
+    @Override
+    public int getNestedScrollAxes() {
+        return 0;
+    }
+
+    @Override
+    public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
+        return mNestedScrollingChildHelper.dispatchNestedFling(velocityX, velocityY, consumed);
+    }
+
+    @Override
+    public boolean onNestedPreFling(View target, float velocityX, float velocityY) {
+        return mNestedScrollingChildHelper.dispatchNestedPreFling(velocityX, velocityY);
+    }
+
+    @Override
+    public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
+        mNestedScrollingChildHelper.dispatchNestedPreScroll(dx, dy, consumed, null);
+
+        if (dy == consumed[1]) {
+            // 滑动值已经被消耗掉了，直接返回
+            return;
+        }
+
+        dy -= consumed[1];
+        if (isReadyForPullDown() && dy < 0) {
+            // 当前是RecyclerView在处理touch事件且列表已经向下滑动到顶了，这种情况下显示下拉刷新View
+            mDraggingMode = DRAG_MODE_DOWN;
+            mNestedScrollValue += dy;
+            consumed[1] += dy;
+            pullDownEvent(mNestedScrollValue);
+        } else if (getScrollY() < 0 && dy > 0) {
+            // 当前是RecyclerView在处理touch事件，而且下拉了一段，这种情况下用户在慢慢往回滑
+            if (dy + getScrollY() < 0) {
+                mNestedScrollValue += dy;
+                consumed[1] += dy;
+            } else {
+                mNestedScrollValue = 0;
+                consumed[1] += dy + getScrollY();
+            }
+            pullDownEvent(mNestedScrollValue);
+        } else if (isReadyForPullUp() && dy > 0) {
+            // 当前是RecyclerView在处理touch事件且列表已经向上滑动到底了，这种情况下显示到底了的提示
+            mDraggingMode = DRAG_MODE_UP;
+            mNestedScrollValue += dy;
+            consumed[1] += dy;
+            pullUpEvent(mNestedScrollValue);
+        } else if (getScrollY() > 0 && dy < 0) {
+            // 当前是RecyclerView在处理touch事件，而且上拉了一段，这种情况下用户在慢慢往回滑
+            if (dy + getScrollY() > 0) {
+                mNestedScrollValue += dy;
+                consumed[1] += dy;
+            } else {
+                mNestedScrollValue = 0;
+                consumed[1] += dy + getScrollY();
+            }
+            pullUpEvent(mNestedScrollValue);
+        }
+    }
+
+    @Override
+    public void onNestedScroll(View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
+        mNestedScrollingChildHelper.dispatchNestedScroll(dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, new int[]{0, 0});
+    }
+
+    @Override
+    public void onNestedScrollAccepted(View child, View target, int axes) {
+
+    }
+
+    @Override
+    public boolean onStartNestedScroll(View child, View target, int nestedScrollAxes) {
+        mNestedScrollingChildHelper.startNestedScroll(nestedScrollAxes);
+        mNestedScrollValue = 0;
+        return true;
+    }
+
+    @Override
+    public void onStopNestedScroll(View child) {
+        mNestedScrollingChildHelper.stopNestedScroll();
+        if (mNestedScrollValue != 0) {
+            handleActionUp();
+            smoothScrollTo(0);
+        }
+        mNestedScrollValue = 0;
     }
 
     // ==========================================================================
-// Inner/Nested Classes
-// ==========================================================================
-    public static interface OnSmoothScrollFinishedListener {
+    // Inner/Nested Classes
+    // ==========================================================================
+    public interface OnSmoothScrollFinishedListener {
         void onSmoothScrollFinished();
     }
 
-    public static interface OnRefreshListener {
-        public void onRefresh(final PullToRefreshRecyclerViewWrapper refreshView);
+    public interface OnRefreshListener {
+        void onRefresh(final PullToRefreshRecyclerViewWrapper refreshView);
     }
 
-    public static interface OnPullEventListener {
-        public void onPullEvent(final PullToRefreshRecyclerViewWrapper refreshView, int state);
+    public interface OnPullEventListener {
+        void onPullEvent(final PullToRefreshRecyclerViewWrapper refreshView, int state);
     }
 
     final class SmoothScrollRunnable implements Runnable {
@@ -1053,7 +943,7 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
         private long mStartTime = -1;
         private int mCurrentY = -1;
 
-        public SmoothScrollRunnable(int fromY, int toY, long duration, OnSmoothScrollFinishedListener listener) {
+        SmoothScrollRunnable(int fromY, int toY, long duration, OnSmoothScrollFinishedListener listener) {
             mScrollFromY = fromY;
             mScrollToY = toY;
             mInterpolator = mScrollAnimationInterpolator;
@@ -1091,7 +981,7 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout {
         }
 
         // 停止
-        public void stop() {
+        void stop() {
             mContinueRunning = false;
             // 感觉没有必要移除，
             removeCallbacks(this);

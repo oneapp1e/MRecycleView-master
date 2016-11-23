@@ -77,6 +77,11 @@ public class MRecyclerView extends RecyclerView {
         return layoutManager;
     }
 
+    @Override
+    public MRecyclerViewAdapter getAdapter() {
+        return (MRecyclerViewAdapter) super.getAdapter();
+    }
+
     // ==========================================================================
     // Setters
     // ==========================================================================
@@ -116,7 +121,6 @@ public class MRecyclerView extends RecyclerView {
         if (adapter instanceof ISpanSizeLookup) {
             setSpanCount(((ISpanSizeLookup) adapter).getSpanCount());
         }
-
     }
 
     public void setISpanSizeLookup(final ISpanSizeLookup l) {

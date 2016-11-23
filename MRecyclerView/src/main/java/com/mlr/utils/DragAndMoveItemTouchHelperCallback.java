@@ -48,8 +48,6 @@ public class DragAndMoveItemTouchHelperCallback extends ItemTouchHelper.Callback
             isDrag = mAdapter.isLongPressDragEnabled2(viewHolder.getAdapterPosition());
         }
 
-        LogUtils.e("mlr getMovementFlags isSwipe:" + isSwipe + "  isDrag:" + isDrag);
-
         //如果是网格布局
         if (recyclerView.getLayoutManager() instanceof GridLayoutManager) {
             if (isSwipe) {
@@ -80,7 +78,6 @@ public class DragAndMoveItemTouchHelperCallback extends ItemTouchHelper.Callback
     public void onMoved(RecyclerView recyclerView, RecyclerView.ViewHolder source, int fromPos, RecyclerView.ViewHolder target, int toPos, int x, int y) {
         if (recyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE
                 && !recyclerView.isComputingLayout() && mAdapter != null) {
-            LogUtils.e("mlr onMoved fromPos:" + fromPos + " toPos:" + toPos);
             mAdapter.onItemMoved(fromPos, toPos);
         }
     }
