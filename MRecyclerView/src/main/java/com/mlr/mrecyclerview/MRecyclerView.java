@@ -1,4 +1,4 @@
-package com.mlr.mrecycleview;
+package com.mlr.mrecyclerview;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -11,7 +11,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import com.mlr.adapter.MRecyclerViewAdapter;
-import com.mlr.mrecyclerview.R;
 import com.mlr.utils.DragAndMoveItemTouchHelperCallback;
 import com.mlr.utils.ISpanSizeLookup;
 import com.mlr.utils.LogUtils;

@@ -4,7 +4,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.mlr.holder.BaseHolder;
-import com.mlr.mrecycleview.BaseActivity;
+import com.mlr.mrecyclerview.BaseActivity;
 
 /**
  * Created by mulinrui on 2016/11/16.

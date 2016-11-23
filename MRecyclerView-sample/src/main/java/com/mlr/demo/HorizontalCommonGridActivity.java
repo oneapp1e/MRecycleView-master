@@ -3,8 +3,8 @@ package com.mlr.demo;
 import android.os.Bundle;
 
 import com.mlr.demo.adapter.CommonGridAdapter;
-import com.mlr.mrecycleview.BaseActivity;
-import com.mlr.mrecycleview.MRecyclerView;
+import com.mlr.mrecyclerview.BaseActivity;
+import com.mlr.mrecyclerview.MRecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;

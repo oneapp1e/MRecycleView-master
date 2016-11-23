@@ -6,8 +6,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.mlr.demo.adapter.MixListGridAdapter;
-import com.mlr.mrecycleview.BaseActivity;
-import com.mlr.mrecycleview.MRecyclerView;
+import com.mlr.mrecyclerview.BaseActivity;
+import com.mlr.mrecyclerview.MRecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;

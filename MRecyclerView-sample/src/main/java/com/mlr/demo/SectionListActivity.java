@@ -9,8 +9,8 @@ import com.mlr.demo.adapter.SectionListAdapter;
 import com.mlr.demo.model.AppInfo;
 import com.mlr.demo.model.TitleInfo;
 import com.mlr.model.ViewTypeInfo;
-import com.mlr.mrecycleview.BaseActivity;
-import com.mlr.mrecycleview.SectionMRecyclerView;
+import com.mlr.mrecyclerview.BaseActivity;
+import com.mlr.mrecyclerview.SectionMRecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;

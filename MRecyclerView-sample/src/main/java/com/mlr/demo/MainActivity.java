@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-import com.mlr.mrecycleview.BaseActivity;
+import com.mlr.mrecyclerview.BaseActivity;
 
 
 public class MainActivity extends BaseActivity {

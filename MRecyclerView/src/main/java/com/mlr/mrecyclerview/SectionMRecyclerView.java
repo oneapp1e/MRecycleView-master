@@ -1,4 +1,4 @@
-package com.mlr.mrecycleview;
+package com.mlr.mrecyclerview;
 
 import android.content.Context;
 import android.graphics.Canvas;

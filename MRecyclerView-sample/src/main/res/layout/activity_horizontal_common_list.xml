@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     tools:context="com.mlr.demo.CommonListActivity">
 
-    <com.mlr.mrecycleview.MRecyclerView
+    <com.mlr.mrecyclerview.MRecyclerView
         android:id="@+id/rv_common_list"
         app:orientation="HORIZONTAL"
         android:layout_width="match_parent"

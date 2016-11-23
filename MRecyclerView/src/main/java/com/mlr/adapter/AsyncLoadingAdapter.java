@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mlr.mrecyclerview.R;
-import com.mlr.mrecycleview.MRecyclerView;
+import com.mlr.mrecyclerview.MRecyclerView;
 import com.mlr.utils.LogUtils;
 
 

@@ -9,7 +9,7 @@ import android.widget.Toast;
 
 import com.mlr.adapter.MRecyclerViewAdapter;
 import com.mlr.demo.holder.CommonListHolder;
-import com.mlr.mrecycleview.BaseActivity;
+import com.mlr.mrecyclerview.BaseActivity;
 import com.mlr.utils.LogUtils;
 
 import java.util.List;

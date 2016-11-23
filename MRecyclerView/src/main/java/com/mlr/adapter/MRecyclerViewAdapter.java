@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.mlr.holder.BaseHolder;
 import com.mlr.mrecyclerview.R;
-import com.mlr.mrecycleview.BaseActivity;
+import com.mlr.mrecyclerview.BaseActivity;
 import com.mlr.utils.ISpanSizeLookup;
 import com.mlr.utils.LogUtils;
 

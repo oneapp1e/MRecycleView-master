@@ -14,8 +14,8 @@ import com.mlr.demo.holder.CommonListHolder2;
 import com.mlr.demo.model.AppInfo;
 import com.mlr.demo.model.TitleInfo;
 import com.mlr.model.ViewTypeInfo;
-import com.mlr.mrecycleview.BaseActivity;
-import com.mlr.mrecycleview.SectionMRecyclerView;
+import com.mlr.mrecyclerview.BaseActivity;
+import com.mlr.mrecyclerview.SectionMRecyclerView;
 import com.mlr.utils.LogUtils;
 
 import java.util.List;
