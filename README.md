@@ -20,7 +20,7 @@
         android:layout_height="match_parent"/>
 
 实现普通列表只需要继承MRecyclerViewAdapter适配器并实现d对应的三个抽象方法即可：
-
+    
     /**
      * 创建itemHolder
      * @param parent
@@ -28,6 +28,7 @@
      * @return
      */
     protected abstract RecyclerView.ViewHolder createItemHolder(ViewGroup parent, int viewType);
+    
     
    /**
      * 子类对item holder 的处理
@@ -37,6 +38,7 @@
      * @param position 已经去除headerview的数量的索引
      */
     protected abstract void bindItemHolder(RecyclerView.ViewHolder holder, int position, int viewType);
+    
     
    /**
      * 获取更多app item的逻辑
@@ -48,8 +50,9 @@
      */
     protected abstract int getMoreData(List<Data> out, int startPosition, int requestSize);
     
+ 
     具体的参照demo就行
 
     上次一次示例图（正在学习制作啊）：
-    ![](https://github.com/oneapp1e/MRecycleView-master/gif01.gif)
+    ![image](https://github.com/oneapp1e/MRecycleView-master/blob/master/gif01.gif)
 
