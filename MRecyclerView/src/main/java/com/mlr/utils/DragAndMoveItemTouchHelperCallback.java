@@ -5,7 +5,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
 import com.mlr.adapter.MRecyclerViewAdapter;
-import com.nineoldandroids.view.ViewHelper;
 
 /**
  * recyclerView支持的item拖拽和滑动删除(针对普通列表和网格  不支持section)
@@ -94,8 +93,8 @@ public class DragAndMoveItemTouchHelperCallback extends ItemTouchHelper.Callback
     public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
         //当选中Item时候会调用该方法，重写此方法可以实现选中时候的一些动画逻辑
         if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
-            ViewHelper.setScaleX(viewHolder.itemView, dragScale);
-            ViewHelper.setScaleY(viewHolder.itemView, dragScale);
+            viewHolder.itemView.setScaleX(dragScale);
+            viewHolder.itemView.setScaleY(dragScale);
         } else {
             super.onSelectedChanged(viewHolder, actionState);
         }
@@ -104,8 +103,8 @@ public class DragAndMoveItemTouchHelperCallback extends ItemTouchHelper.Callback
     @Override
     public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
         //当动画已经结束的时候调用该方法，重写此方法可以实现恢复Item的初始状态
-        ViewHelper.setScaleX(viewHolder.itemView, 1);
-        ViewHelper.setScaleY(viewHolder.itemView, 1);
+        viewHolder.itemView.setScaleX(1);
+        viewHolder.itemView.setScaleY(1);
         super.clearView(recyclerView, viewHolder);
         if (recyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE
                 && !recyclerView.isComputingLayout() && mAdapter != null) {
