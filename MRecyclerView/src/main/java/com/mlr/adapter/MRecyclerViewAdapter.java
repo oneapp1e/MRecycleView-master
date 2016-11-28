@@ -392,7 +392,7 @@ public abstract class MRecyclerViewAdapter<Data> extends AsyncLoadingAdapter imp
     /**
      * 将headerView添加到第一个位置
      *
-     * @param v 添加的eaderView
+     * @param v 添加的headerView
      */
     public void addFirstHeaderView(View v) {
         addHeaderView(v, 0);
@@ -613,7 +613,7 @@ public abstract class MRecyclerViewAdapter<Data> extends AsyncLoadingAdapter imp
     }
 
     /**
-     * 移动item完成，动画结束，需要更新一下数据.</br>
+     * 移动item完成，动画结束，需要更新一下数据.
      * 否则会造成onClick方法里面position没有更新获取的数据不对
      */
     public void clearView() {
