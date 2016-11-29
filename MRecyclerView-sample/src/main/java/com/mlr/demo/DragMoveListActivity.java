@@ -1,16 +1,13 @@
 package com.mlr.demo;
 
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
 import com.mlr.demo.adapter.DragMoveListAdapter;
+import com.mlr.demo.data.DataServer;
 import com.mlr.mrecyclerview.BaseActivity;
 import com.mlr.mrecyclerview.MRecyclerView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DragMoveListActivity extends BaseActivity {
 
@@ -21,12 +18,7 @@ public class DragMoveListActivity extends BaseActivity {
 
         MRecyclerView rvCommonList = (MRecyclerView) findViewById(R.id.rv_common_list);
 
-        List<String> list = new ArrayList<>(20);
-        for (int i = 0; i < 20; i++) {
-            list.add("common" + i);
-        }
-
-        DragMoveListAdapter commonListAdapter = new DragMoveListAdapter(this, list);
+        DragMoveListAdapter commonListAdapter = new DragMoveListAdapter(this, DataServer.getCommonData(20));
         //启动到底了试图
         commonListAdapter.setToEndEnabled(true, rvCommonList);
         //添加headerView
@@ -48,12 +40,10 @@ public class DragMoveListActivity extends BaseActivity {
     }
 
     private View createHeadView(String headerText) {
-        TextView textView = new TextView(this);
-        int padding = dip2px(5);
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, dip2px(10));
-        textView.setPadding(padding, padding, padding, padding);
+        View inflate = inflate(R.layout.common_list_item);
+        TextView textView = (TextView) inflate.findViewById(R.id.tweetText);
         textView.setText(headerText);
-        return textView;
+        return inflate;
     }
 
 }

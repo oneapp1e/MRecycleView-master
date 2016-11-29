@@ -3,11 +3,9 @@ package com.mlr.demo;
 import android.os.Bundle;
 
 import com.mlr.demo.adapter.CommonListAdapter;
+import com.mlr.demo.data.DataServer;
 import com.mlr.mrecyclerview.BaseActivity;
 import com.mlr.mrecyclerview.MRecyclerView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class HorizontalCommonListActivity extends BaseActivity {
 
@@ -18,12 +16,7 @@ public class HorizontalCommonListActivity extends BaseActivity {
 
         MRecyclerView rvCommonList = (MRecyclerView) findViewById(R.id.rv_common_list);
 
-        List<String> list = new ArrayList<>(20);
-        for (int i = 0; i < 20; i++) {
-            list.add("common" + i);
-        }
-
-        CommonListAdapter commonListAdapter = new CommonListAdapter(this, list);
+        CommonListAdapter commonListAdapter = new CommonListAdapter(this,  DataServer.getCommonData(20));
         //启动到底了试图
         commonListAdapter.setToEndEnabled(true, rvCommonList);
         rvCommonList.setAdapter(commonListAdapter);

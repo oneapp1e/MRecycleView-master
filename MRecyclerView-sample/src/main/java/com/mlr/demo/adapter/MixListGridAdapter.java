@@ -1,15 +1,18 @@
 package com.mlr.demo.adapter;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mlr.adapter.MRecyclerViewAdapter;
-import com.mlr.demo.holder.CommonListHolder;
-import com.mlr.demo.holder.CommonListHolder2;
+import com.mlr.demo.R;
+import com.mlr.demo.data.DataServer;
+import com.mlr.demo.holder.AppInfoHolder;
+import com.mlr.demo.holder.TitleInfoHolder;
+import com.mlr.demo.model.AppInfo;
+import com.mlr.demo.model.TitleInfo;
+import com.mlr.model.ViewTypeInfo;
 import com.mlr.mrecyclerview.BaseActivity;
 import com.mlr.utils.LogUtils;
 
@@ -18,41 +21,48 @@ import java.util.List;
 /**
  * Created by mulinrui on 2016/11/16.
  */
-public class MixListGridAdapter extends MRecyclerViewAdapter<String> {
+public class MixListGridAdapter extends MRecyclerViewAdapter<ViewTypeInfo> {
 
     // ==========================================================================
     // Constants
     // ==========================================================================
-    private int MaxCount = 3;//假数据 最多加载3次更多数据
     private int count = 0;
     // ==========================================================================
     // Fields
     // ==========================================================================
+    private static final int VIEW_TYPE_GRID = VIEW_TYPE_ITEM;
 
-    private static final int VIEW_TYPE_LIST = VIEW_TYPE_ITEM;
-
-    private static final int VIEW_TYPE_GRID = VIEW_TYPE_LIST + 1;
+    private static final int VIEW_TYPE_LIST = VIEW_TYPE_GRID + 1;
     // ==========================================================================
     // Constructors
     // ==========================================================================
 
-    public MixListGridAdapter(BaseActivity activity, List<? extends String> items) {
+    public MixListGridAdapter(BaseActivity activity, List<ViewTypeInfo> items) {
         super(activity, items);
     }
 
     @Override
     public int getSpanCount() {
-        return 2;
+        return DataServer.spanCount;
     }
+
 
     @Override
     protected int getSpanSize(int position, int viewType) {
-        return viewType == VIEW_TYPE_LIST ? 1 : 2;
+        if (viewType == VIEW_TYPE_LIST) {
+            return DataServer.spanCount;
+        } else {
+            return super.getSpanSize(position, viewType);
+        }
     }
 
     @Override
     protected int getItemType(int position) {
-        return position % 3 == 0 ? VIEW_TYPE_GRID : VIEW_TYPE_LIST;
+        if (getItem(position) instanceof TitleInfo) {
+            return VIEW_TYPE_LIST;
+        } else {
+            return VIEW_TYPE_GRID;
+        }
     }
 
     // ==========================================================================
@@ -69,30 +79,28 @@ public class MixListGridAdapter extends MRecyclerViewAdapter<String> {
     // ==========================================================================
     @Override
     protected RecyclerView.ViewHolder createItemHolder(ViewGroup parent, int viewType) {
-        TextView textView = new TextView(getActivity());
-        int padding = getActivity().dip2px(5);
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, getActivity().dip2px(10));
-        textView.setPadding(padding, padding, padding, padding);
-        if (viewType == VIEW_TYPE_LIST) {
-            return new CommonListHolder(textView, getActivity());
+        View textView = getActivity().inflate(R.layout.common_list_item, parent, false);
+        if (viewType == VIEW_TYPE_GRID) {
+            return new AppInfoHolder(textView, getActivity());
         } else {
-            return new CommonListHolder2(textView, getActivity());
+            return new TitleInfoHolder(textView, getActivity());
         }
     }
+
 
     @Override
     protected void bindItemHolder(RecyclerView.ViewHolder holder, final int position, int viewType) {
-        if (viewType == VIEW_TYPE_LIST) {
-            ((CommonListHolder) holder).setData(getData().get(position));
-            ((CommonListHolder) holder).itemView.setOnClickListener(new View.OnClickListener() {
+        if (viewType == VIEW_TYPE_GRID) {
+            ((AppInfoHolder) holder).setData((AppInfo) getData().get(position));
+            ((AppInfoHolder) holder).itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Toast.makeText(getActivity(), getData().get(position) + "  position:" + position, Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            ((CommonListHolder2) holder).setData(getData().get(position));
-            ((CommonListHolder2) holder).itemView.setOnClickListener(new View.OnClickListener() {
+            ((TitleInfoHolder) holder).setData((TitleInfo) getData().get(position));
+            ((TitleInfoHolder) holder).itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Toast.makeText(getActivity(), getData().get(position) + "  position:" + position, Toast.LENGTH_SHORT).show();
@@ -102,14 +110,12 @@ public class MixListGridAdapter extends MRecyclerViewAdapter<String> {
     }
 
     @Override
-    protected int getMoreData(List<String> out, int startPosition, int requestSize) {
-        if (count >= MaxCount) {
+    protected int getMoreData(List<ViewTypeInfo> out, int startPosition, int requestSize) {
+        if (count >= DataServer.MaxCount) {
             LogUtils.e("mlr 没有更多数据");
         } else {
             LogUtils.e("mlr 请求更多数据");
-            for (int i = 0; i < requestSize; i++) {
-                out.add("more data " + i);
-            }
+            out.addAll(DataServer.getSectionMoreData(requestSize));
             count++;
         }
         return 200;

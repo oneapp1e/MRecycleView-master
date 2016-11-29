@@ -3,22 +3,24 @@ package com.mlr.demo.holder;
 import android.view.View;
 import android.widget.TextView;
 
+import com.mlr.demo.R;
+import com.mlr.demo.model.AppInfo;
 import com.mlr.holder.BaseHolder;
 import com.mlr.mrecyclerview.BaseActivity;
 
 /**
  * Created by mulinrui on 2016/11/16.
  */
-public class CommonListHolder2 extends BaseHolder<String> {
+public class AppInfoHolder extends BaseHolder<AppInfo> {
 
     private TextView mTextView;
 
     // ==========================================================================
     // Constants
     // ==========================================================================
-    public CommonListHolder2(View itemView, BaseActivity activity) {
+    public AppInfoHolder(View itemView, BaseActivity activity) {
         super(itemView, activity);
-        mTextView = (TextView) itemView;
+        mTextView = (TextView) itemView.findViewById(R.id.tweetText);
     }
 
     // ==========================================================================
@@ -41,8 +43,12 @@ public class CommonListHolder2 extends BaseHolder<String> {
     // ==========================================================================
 
     @Override
-    public void setData(String s) {
-        super.setData(s);
+    public void setData(AppInfo appInfo) {
+        super.setData(appInfo);
+        mTextView.setText(appInfo.getAppName());
+    }
+
+    public void setText(String s) {
         mTextView.setText(s);
     }
 
