@@ -12,8 +12,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.mlr.holder.BaseHolder;
-import com.mlr.mrecyclerview.R;
+import com.mlr.model.ViewTypeInfo;
 import com.mlr.mrecyclerview.BaseActivity;
+import com.mlr.mrecyclerview.R;
 import com.mlr.utils.ISpanSizeLookup;
 import com.mlr.utils.LogUtils;
 
@@ -28,7 +29,7 @@ import java.util.Vector;
  *
  * @param <Data> 数据列表
  */
-public abstract class MRecyclerViewAdapter<Data> extends AsyncLoadingAdapter implements ISpanSizeLookup, View.OnAttachStateChangeListener {
+public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends AsyncLoadingAdapter implements ISpanSizeLookup, View.OnAttachStateChangeListener {
     // ==========================================================================
     // Constants
     // ==========================================================================
@@ -195,7 +196,7 @@ public abstract class MRecyclerViewAdapter<Data> extends AsyncLoadingAdapter imp
         getActivity().refreshAdapterViewSafe(this);
     }
 
-    public Object getItem(int position) {
+    public Data getItem(int position) {
         if (position < 0 || position >= mItems.size()) {
             return null;
         }
@@ -230,8 +231,13 @@ public abstract class MRecyclerViewAdapter<Data> extends AsyncLoadingAdapter imp
      * @param position 已经减去headerView数量的索引
      * @return viewType
      */
-    protected int getItemType(int position) {
-        return VIEW_TYPE_ITEM;
+    private final int getItemType(int position) {
+        if (getItem(position).getViewType() < VIEW_TYPE_ITEM ||
+                getItem(position).getViewType() >= VIEW_TYPE_HEAD_VIEW_ONE) {
+            LogUtils.e("mlr getItemType position:" + position + " viewType:" + getItem(position).getViewType());
+            throw new RuntimeException("ViewType没有设置啊，请调用setViewType设置大于等于3小于1000的ViewType");
+        }
+        return getItem(position).getViewType();
     }
 
     @Override
@@ -249,6 +255,7 @@ public abstract class MRecyclerViewAdapter<Data> extends AsyncLoadingAdapter imp
 
     /**
      * 创建itemHolder
+     *
      * @param parent
      * @param viewType
      * @return

@@ -30,9 +30,7 @@ public class MixListGridAdapter extends MRecyclerViewAdapter<ViewTypeInfo> {
     // ==========================================================================
     // Fields
     // ==========================================================================
-    private static final int VIEW_TYPE_GRID = VIEW_TYPE_ITEM;
 
-    private static final int VIEW_TYPE_LIST = VIEW_TYPE_GRID + 1;
     // ==========================================================================
     // Constructors
     // ==========================================================================
@@ -49,19 +47,10 @@ public class MixListGridAdapter extends MRecyclerViewAdapter<ViewTypeInfo> {
 
     @Override
     protected int getSpanSize(int position, int viewType) {
-        if (viewType == VIEW_TYPE_LIST) {
+        if (viewType == DataServer.VIEW_TYPE_TITLE) {
             return DataServer.spanCount;
         } else {
             return super.getSpanSize(position, viewType);
-        }
-    }
-
-    @Override
-    protected int getItemType(int position) {
-        if (getItem(position) instanceof TitleInfo) {
-            return VIEW_TYPE_LIST;
-        } else {
-            return VIEW_TYPE_GRID;
         }
     }
 
@@ -80,7 +69,7 @@ public class MixListGridAdapter extends MRecyclerViewAdapter<ViewTypeInfo> {
     @Override
     protected RecyclerView.ViewHolder createItemHolder(ViewGroup parent, int viewType) {
         View textView = getActivity().inflate(R.layout.common_list_item, parent, false);
-        if (viewType == VIEW_TYPE_GRID) {
+        if (viewType == DataServer.VIEW_TYPE_LIST) {
             return new AppInfoHolder(textView, getActivity());
         } else {
             return new TitleInfoHolder(textView, getActivity());
@@ -90,7 +79,7 @@ public class MixListGridAdapter extends MRecyclerViewAdapter<ViewTypeInfo> {
 
     @Override
     protected void bindItemHolder(RecyclerView.ViewHolder holder, final int position, int viewType) {
-        if (viewType == VIEW_TYPE_GRID) {
+        if (viewType == DataServer.VIEW_TYPE_LIST) {
             ((AppInfoHolder) holder).setData((AppInfo) getData().get(position));
             ((AppInfoHolder) holder).itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -182,9 +182,7 @@ public abstract class AsyncLoadingAdapter extends RecyclerView.Adapter<ViewHolde
      * @param position 在列表中的位置
      * @return 该列表项的类型
      */
-    protected int getContentItemViewType(int position) {
-        return VIEW_TYPE_ITEM;
-    }
+    protected abstract int getContentItemViewType(int position);
 
     /**
      * 获取列表项的视图

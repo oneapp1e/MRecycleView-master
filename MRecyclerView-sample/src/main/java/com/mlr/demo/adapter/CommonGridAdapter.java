@@ -39,7 +39,7 @@ public class CommonGridAdapter extends MRecyclerViewAdapter<AppInfo> {
 
     @Override
     public int getSpanCount() {
-        return 3;
+        return DataServer.spanCount;
     }
 
     // ==========================================================================

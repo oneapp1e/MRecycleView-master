@@ -33,9 +33,6 @@ public class SectionListAdapter extends MRecyclerViewAdapter<ViewTypeInfo> imple
     // Fields
     // ==========================================================================
 
-    private static final int VIEW_TYPE_LIST = VIEW_TYPE_ITEM;
-
-    private static final int VIEW_TYPE_SECTION = VIEW_TYPE_LIST + 1;
     // ==========================================================================
     // Constructors
     // ==========================================================================
@@ -52,17 +49,9 @@ public class SectionListAdapter extends MRecyclerViewAdapter<ViewTypeInfo> imple
 
     @Override
     public int getSectionViewType() {
-        return VIEW_TYPE_SECTION;
+        return DataServer.VIEW_TYPE_TITLE;
     }
 
-    @Override
-    protected int getItemType(int position) {
-        if (getItem(position) instanceof TitleInfo) {
-            return VIEW_TYPE_SECTION;
-        } else {
-            return VIEW_TYPE_LIST;
-        }
-    }
 
     // ==========================================================================
     // Getters
@@ -79,7 +68,7 @@ public class SectionListAdapter extends MRecyclerViewAdapter<ViewTypeInfo> imple
     @Override
     protected RecyclerView.ViewHolder createItemHolder(ViewGroup parent, int viewType) {
         View textView = getActivity().inflate(R.layout.common_list_item, parent, false);
-        if (viewType == VIEW_TYPE_LIST) {
+        if (viewType == DataServer.VIEW_TYPE_LIST) {
             return new AppInfoHolder(textView, getActivity());
         } else {
             textView.setBackgroundColor(getActivity().getColorRes(R.color.colorAccent));
@@ -97,7 +86,7 @@ public class SectionListAdapter extends MRecyclerViewAdapter<ViewTypeInfo> imple
 
     @Override
     protected void bindItemHolder(RecyclerView.ViewHolder holder, final int position, int viewType) {
-        if (viewType == VIEW_TYPE_LIST) {
+        if (viewType == DataServer.VIEW_TYPE_LIST) {
             AppInfo appInfo = (AppInfo) getData().get(position);
             ((AppInfoHolder) holder).setData(appInfo);
             ((AppInfoHolder) holder).itemView.setOnClickListener(new View.OnClickListener() {
@@ -124,7 +113,7 @@ public class SectionListAdapter extends MRecyclerViewAdapter<ViewTypeInfo> imple
             LogUtils.e("mlr 没有更多数据");
         } else {
             LogUtils.e("mlr 请求更多数据");
-            out.addAll(DataServer.getSectionMoreData(2));
+            out.addAll(DataServer.getSectionMoreData(requestSize));
             count++;
         }
         return 200;

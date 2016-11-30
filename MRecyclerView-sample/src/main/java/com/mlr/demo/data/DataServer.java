@@ -15,6 +15,10 @@ public class DataServer {
     // ==========================================================================
     // Constants
     // ==========================================================================
+    public static final int VIEW_TYPE_LIST = 3;
+
+    public static final int VIEW_TYPE_TITLE = VIEW_TYPE_LIST + 1;
+
     public static final int MaxCount = 3;//假数据 最多加载3次更多数据
 
     public static final int spanCount = 2;
@@ -37,6 +41,7 @@ public class DataServer {
         for (int i = 0; i < length; i++) {
             AppInfo appInfo = new AppInfo();
             appInfo.setAppName("common" + i);
+            appInfo.setViewType(VIEW_TYPE_LIST);
             list.add(appInfo);
         }
         return list;
@@ -47,6 +52,7 @@ public class DataServer {
         for (int i = 0; i < length; i++) {
             AppInfo appInfo = new AppInfo();
             appInfo.setAppName("more data " + i);
+            appInfo.setViewType(VIEW_TYPE_LIST);
             list.add(appInfo);
         }
         return list;
@@ -57,10 +63,12 @@ public class DataServer {
         for (int j = 0; j < length; j++) {
             TitleInfo titleInfo = new TitleInfo();
             titleInfo.setTitle("title" + j);
+            titleInfo.setViewType(VIEW_TYPE_TITLE);
             list.add(titleInfo);
             for (int i = 0; i < 5; i++) {
                 AppInfo appInfo = new AppInfo();
                 appInfo.setAppName("title" + j + " appName" + i);
+                appInfo.setViewType(VIEW_TYPE_LIST);
                 list.add(appInfo);
             }
         }
@@ -72,10 +80,12 @@ public class DataServer {
         for (int j = 0; j < length; j++) {
             TitleInfo titleInfo = new TitleInfo();
             titleInfo.setTitle("more title" + j);
+            titleInfo.setViewType(VIEW_TYPE_TITLE);
             list.add(titleInfo);
             for (int i = 0; i < 5; i++) {
                 AppInfo appInfo = new AppInfo();
                 appInfo.setAppName("more title" + j + " appName" + i);
+                appInfo.setViewType(VIEW_TYPE_LIST);
                 list.add(appInfo);
             }
         }
