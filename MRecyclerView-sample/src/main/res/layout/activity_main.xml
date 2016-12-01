@@ -78,5 +78,13 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/activity_horizontal_margin"
             android:text="PullToRefreshListView"/>
+
+
+        <Button
+            android:id="@+id/btn_Swipe_refresh_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
+            android:text="SwipeRefreshListView"/>
     </LinearLayout>
 </ScrollView>

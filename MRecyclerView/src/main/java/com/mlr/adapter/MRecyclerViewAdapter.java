@@ -83,7 +83,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     // Getters
     // ==========================================================================
 
-    protected List<Data> getData() {
+    public List<Data> getData() {
         return mItems;
     }
 
@@ -573,7 +573,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
      *
      * @param position 位置
      */
-    public void onItemDismiss(int position) {
+    public final void onItemDismiss(int position) {
         mItems.remove(position - getHeaderCount());
         notifyItemRemoved(position);
         getActivity().postDelayed(new Runnable() {
@@ -617,7 +617,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
      * @param from 起始位置
      * @param to   结束位置
      */
-    public void onItemMoved(int from, int to) {
+    public final void onItemMoved(int from, int to) {
         LogUtils.e("mlr onItemMoved from:" + from + "  to:" + to + "  mItems.size():" + mItems.size());
         //如果适配器索引值大于数据集合的索引值 说明子类有其他处理 那么此处不进行移动  子类可以重新该方法
         if (from > getCount() - 1 || to > getCount() - 1) {
@@ -631,18 +631,18 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
      * 移动item完成，动画结束，需要更新一下数据.
      * 否则会造成onClick方法里面position没有更新获取的数据不对
      */
-    public void clearView() {
+    public final void clearView() {
         notifyDataSetChanged();
     }
 
 
     @Override
-    public void onViewAttachedToWindow(View view) {
+    public final void onViewAttachedToWindow(View view) {
         ((AnimationDrawable) (((ImageView) view).getDrawable())).start();
     }
 
     @Override
-    public void onViewDetachedFromWindow(View view) {
+    public final void onViewDetachedFromWindow(View view) {
         view.removeOnAttachStateChangeListener(this);
     }
 

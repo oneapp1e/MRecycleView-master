@@ -110,5 +110,14 @@ public class MainActivity extends BaseActivity {
                 startActivity(intent);
             }
         });
+
+        View btnSwipeRefreshList = findViewById(R.id.btn_Swipe_refresh_list);
+        btnSwipeRefreshList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, SwipeRefreshListActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }
