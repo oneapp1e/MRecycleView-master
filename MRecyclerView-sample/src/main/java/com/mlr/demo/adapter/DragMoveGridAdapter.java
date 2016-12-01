@@ -1,6 +1,5 @@
 package com.mlr.demo.adapter;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -18,7 +17,7 @@ import java.util.List;
 /**
  * Created by mulinrui on 2016/11/16.
  */
-public class DragMoveGridAdapter extends MRecyclerViewAdapter<AppInfo> {
+public class DragMoveGridAdapter extends MRecyclerViewAdapter<AppInfo, AppInfoHolder> {
 
     // ==========================================================================
     // Constants
@@ -66,16 +65,16 @@ public class DragMoveGridAdapter extends MRecyclerViewAdapter<AppInfo> {
     // Methods
     // ==========================================================================
     @Override
-    protected RecyclerView.ViewHolder createItemHolder(ViewGroup parent, int viewType) {
+    protected AppInfoHolder createItemHolder(ViewGroup parent, int viewType) {
         View textView = getActivity().inflate(R.layout.common_list_item, parent, false);
         return new AppInfoHolder(textView, getActivity());
     }
 
     @Override
-    protected void bindItemHolder(final RecyclerView.ViewHolder holder, final int position, int viewType) {
-        ((AppInfoHolder) holder).setData(getData().get(position));
-        ((AppInfoHolder) holder).setText(getData().get(position).getAppName() + "  position:" + position);
-        ((AppInfoHolder) holder).itemView.setOnClickListener(new View.OnClickListener() {
+    protected void bindItemHolder(AppInfoHolder holder, final int position, int viewType) {
+        holder.setData(getData().get(position));
+        holder.setText(getData().get(position).getAppName() + "  position:" + position);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(getActivity(), getData().get(position) + "  position:" + position, Toast.LENGTH_SHORT).show();

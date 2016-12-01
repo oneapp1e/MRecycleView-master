@@ -1,14 +1,15 @@
 package com.mlr.adapter;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.mlr.mrecyclerview.R;
+import com.mlr.holder.BaseHolder;
+import com.mlr.holder.SimpleHolder;
+import com.mlr.mrecyclerview.BaseActivity;
 import com.mlr.mrecyclerview.MRecyclerView;
+import com.mlr.mrecyclerview.R;
 import com.mlr.utils.LogUtils;
 
 
@@ -18,7 +19,7 @@ import com.mlr.utils.LogUtils;
  *
  * @author mulinrui
  */
-public abstract class AsyncLoadingAdapter extends RecyclerView.Adapter<ViewHolder> {
+public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends RecyclerView.Adapter<T> {
     // ==========================================================================
     // Constants
     // ==========================================================================
@@ -59,7 +60,6 @@ public abstract class AsyncLoadingAdapter extends RecyclerView.Adapter<ViewHolde
     // ==========================================================================
     // Fields
     // ==========================================================================
-    private Context mContext;
     private volatile boolean mLoading;
     /**
      * 更多视图是否启用  默认启用
@@ -82,11 +82,13 @@ public abstract class AsyncLoadingAdapter extends RecyclerView.Adapter<ViewHolde
      */
     private MRecyclerView mRecyclerView;
 
+    private BaseActivity mActivity;
+
     // ==========================================================================
     // Constructors
     // ==========================================================================
-    AsyncLoadingAdapter(Context context) {
-        mContext = context;
+    AsyncLoadingAdapter(BaseActivity activity) {
+        mActivity = activity;
         mLoading = false;
         mMoreEnabled = true;
         mItemLimit = ITEM_COUNT_LIMIT;
@@ -95,12 +97,13 @@ public abstract class AsyncLoadingAdapter extends RecyclerView.Adapter<ViewHolde
     // ==========================================================================
     // Getters
     // ==========================================================================
-    public Context getContext() {
-        return mContext;
-    }
 
     public boolean isMoreEnabled() {
         return mMoreEnabled;
+    }
+
+    protected BaseActivity getActivity() {
+        return mActivity;
     }
 
     // ==========================================================================
@@ -187,12 +190,12 @@ public abstract class AsyncLoadingAdapter extends RecyclerView.Adapter<ViewHolde
     /**
      * 获取列表项的视图
      */
-    protected abstract ViewHolder createItemViewHolder(ViewGroup parent, int viewType);
+    protected abstract T createItemViewHolder(ViewGroup parent, int viewType);
 
     /**
      * 获取“更多”项的视图
      */
-    public abstract ViewHolder createMoreViewHolder(ViewGroup parent, int viewType);
+    public abstract T createMoreViewHolder(ViewGroup parent, int viewType);
 
     /**
      * 获取底部到底了视图
@@ -201,10 +204,9 @@ public abstract class AsyncLoadingAdapter extends RecyclerView.Adapter<ViewHolde
      * @param viewType viewType
      * @return ViewHolder
      */
-    private ViewHolder createEndViewHolder(ViewGroup parent, int viewType) {
-        View v = View.inflate(mContext, R.layout.list_to_end, null);
-        return new ViewHolder(v) {
-        };
+    private T createEndViewHolder(ViewGroup parent, int viewType) {
+        View v = getActivity().inflate(R.layout.list_to_end, parent, false);
+        return (T) new SimpleHolder(v, getActivity());
     }
 
     /**
@@ -354,8 +356,8 @@ public abstract class AsyncLoadingAdapter extends RecyclerView.Adapter<ViewHolde
     }
 
     @Override
-    public final ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        ViewHolder viewHolder;
+    public final T onCreateViewHolder(ViewGroup parent, int viewType) {
+        T viewHolder;
         if (viewType == VIEW_TYPE_MORE) {
             viewHolder = createMoreViewHolder(parent, viewType);
         } else if (viewType == VIEW_TYPE_END) {
@@ -366,14 +368,13 @@ public abstract class AsyncLoadingAdapter extends RecyclerView.Adapter<ViewHolde
 
         if (viewHolder == null) {
             LogUtils.e("Found NULL view at " + viewType + "!", new Exception());
-            return new ViewHolder(new View(getContext())) {
-            };
+            return (T) new SimpleHolder(new View(getActivity()), getActivity());
         }
         return viewHolder;
     }
 
     @Override
-    public final void onBindViewHolder(final ViewHolder holder, final int position) {
+    public final void onBindViewHolder(final T holder, final int position) {
         final int itemCount = getCount();
         if ((position >= itemCount - 1 - getPreloadCount()) && (itemCount < getItemLimit()) && hasMore()
                 && mMoreEnabled) {
@@ -396,11 +397,11 @@ public abstract class AsyncLoadingAdapter extends RecyclerView.Adapter<ViewHolde
     /**
      * 数据处理
      */
-    protected abstract void bindItemViewHolder(ViewHolder holder, int position, int viewType);
+    protected abstract void bindItemViewHolder(T holder, int position, int viewType);
 
-    protected abstract void bindMoreViewHolder(ViewHolder holder, int position, int viewType);
+    protected abstract void bindMoreViewHolder(T holder, int position, int viewType);
 
-    private void bindEndViewHolder(ViewHolder holder, int position, int viewType) {
+    private void bindEndViewHolder(T holder, int position, int viewType) {
     }
 
     // ==========================================================================

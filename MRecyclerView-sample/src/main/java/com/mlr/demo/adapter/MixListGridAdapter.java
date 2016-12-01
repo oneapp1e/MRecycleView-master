@@ -1,6 +1,5 @@
 package com.mlr.demo.adapter;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -12,6 +11,7 @@ import com.mlr.demo.holder.AppInfoHolder;
 import com.mlr.demo.holder.TitleInfoHolder;
 import com.mlr.demo.model.AppInfo;
 import com.mlr.demo.model.TitleInfo;
+import com.mlr.holder.BaseHolder;
 import com.mlr.model.ViewTypeInfo;
 import com.mlr.mrecyclerview.BaseActivity;
 import com.mlr.utils.LogUtils;
@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * Created by mulinrui on 2016/11/16.
  */
-public class MixListGridAdapter extends MRecyclerViewAdapter<ViewTypeInfo> {
+public class MixListGridAdapter extends MRecyclerViewAdapter<ViewTypeInfo, BaseHolder> {
 
     // ==========================================================================
     // Constants
@@ -67,7 +67,7 @@ public class MixListGridAdapter extends MRecyclerViewAdapter<ViewTypeInfo> {
     // Methods
     // ==========================================================================
     @Override
-    protected RecyclerView.ViewHolder createItemHolder(ViewGroup parent, int viewType) {
+    protected BaseHolder createItemHolder(ViewGroup parent, int viewType) {
         View textView = getActivity().inflate(R.layout.common_list_item, parent, false);
         if (viewType == DataServer.VIEW_TYPE_LIST) {
             return new AppInfoHolder(textView, getActivity());
@@ -78,7 +78,7 @@ public class MixListGridAdapter extends MRecyclerViewAdapter<ViewTypeInfo> {
 
 
     @Override
-    protected void bindItemHolder(RecyclerView.ViewHolder holder, final int position, int viewType) {
+    protected void bindItemHolder(BaseHolder holder, final int position, int viewType) {
         if (viewType == DataServer.VIEW_TYPE_LIST) {
             ((AppInfoHolder) holder).setData((AppInfo) getData().get(position));
             ((AppInfoHolder) holder).itemView.setOnClickListener(new View.OnClickListener() {

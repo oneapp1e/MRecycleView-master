@@ -2,7 +2,6 @@ package com.mlr.adapter;
 
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Looper;
-import android.support.v7.widget.RecyclerView;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -12,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.mlr.holder.BaseHolder;
+import com.mlr.holder.SimpleHolder;
 import com.mlr.model.ViewTypeInfo;
 import com.mlr.mrecyclerview.BaseActivity;
 import com.mlr.mrecyclerview.R;
@@ -28,8 +28,10 @@ import java.util.Vector;
  * 可以使用addHeaderView
  *
  * @param <Data> 数据列表
+ * @param <T>    BaseHolder
  */
-public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends AsyncLoadingAdapter implements ISpanSizeLookup, View.OnAttachStateChangeListener {
+public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends BaseHolder>
+        extends AsyncLoadingAdapter<T> implements ISpanSizeLookup, View.OnAttachStateChangeListener {
     // ==========================================================================
     // Constants
     // ==========================================================================
@@ -43,8 +45,6 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends As
     private List<Data> mItems;
 
     private volatile boolean mHasMore;
-
-    private BaseActivity mActivity;
     /**
      * loadmore 之前是否需要阻塞
      */
@@ -61,7 +61,6 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends As
     // ==========================================================================
     public MRecyclerViewAdapter(BaseActivity activity, List<? extends Data> items) {
         super(activity);
-        mActivity = activity;
         mItems = new ArrayList<>();
         if (null != items) {
             appendData(items);
@@ -80,9 +79,6 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends As
     // ==========================================================================
     // Getters
     // ==========================================================================
-    protected BaseActivity getActivity() {
-        return mActivity;
-    }
 
     protected List<Data> getData() {
         return mItems;
@@ -119,7 +115,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends As
             notifyDataSetChanged();
         } else {
             // 调用在非UI线程
-            mActivity.post(new Runnable() {
+            getActivity().post(new Runnable() {
                 @Override
                 public void run() {
                     notifyDataSetChanged();
@@ -165,7 +161,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends As
             setDataInner(data);
         } else {
             // 调用在非UI线程
-            mActivity.post(new Runnable() {
+            getActivity().post(new Runnable() {
 
                 @Override
                 public void run() {
@@ -241,13 +237,12 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends As
     }
 
     @Override
-    protected final RecyclerView.ViewHolder createItemViewHolder(ViewGroup parent, int viewType) {
+    protected final T createItemViewHolder(ViewGroup parent, int viewType) {
         if (viewType >= VIEW_TYPE_HEAD_VIEW_ONE && viewType < VIEW_TYPE_HEAD_VIEW_ONE + mHeaderViews.size()) {
             if (mHeaderViews.get(viewType) == null) {
                 throw new RuntimeException("HeaderView 为空了，请检查headerView的添加");
             } else {
-                return new RecyclerView.ViewHolder(mHeaderViews.get(viewType)) {
-                };
+                return (T) new SimpleHolder(mHeaderViews.get(viewType), getActivity());
             }
         }
         return createItemHolder(parent, viewType);
@@ -256,14 +251,14 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends As
     /**
      * 创建itemHolder
      *
-     * @param parent
-     * @param viewType
-     * @return
+     * @param parent   parent
+     * @param viewType viewType
+     * @return BaseHolder
      */
-    protected abstract RecyclerView.ViewHolder createItemHolder(ViewGroup parent, int viewType);
+    protected abstract T createItemHolder(ViewGroup parent, int viewType);
 
     @Override
-    protected final void bindItemViewHolder(RecyclerView.ViewHolder holder, int position, int viewType) {
+    protected final void bindItemViewHolder(T holder, int position, int viewType) {
         if (viewType >= VIEW_TYPE_HEAD_VIEW_ONE && viewType < VIEW_TYPE_HEAD_VIEW_ONE + mHeaderViews.size()) {
             //headerView不处理
             LogUtils.v("bindItemViewHolder headerView不处理");
@@ -283,7 +278,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends As
      * @param holder   ViewHolder
      * @param position 已经去除headerview的数量的索引
      */
-    protected abstract void bindItemHolder(RecyclerView.ViewHolder holder, int position, int viewType);
+    protected abstract void bindItemHolder(T holder, int position, int viewType);
 
     @Override
     public boolean hasMore() {
@@ -339,18 +334,17 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends As
     }
 
     @Override
-    public final RecyclerView.ViewHolder createMoreViewHolder(ViewGroup parent, int viewType) {
+    public final T createMoreViewHolder(ViewGroup parent, int viewType) {
         View v = getActivity().inflate(R.layout.list_load_more, parent, false);
         mBtnRefresh = (TextView) v.findViewById(R.id.btn_refresh);
         mSpinnerBg = (LinearLayout) v.findViewById(R.id.relative_spinner_bg);
         v.findViewById(R.id.drawable_loading).removeOnAttachStateChangeListener(this);
         v.findViewById(R.id.drawable_loading).addOnAttachStateChangeListener(this);
-        return new RecyclerView.ViewHolder(v) {
-        };
+        return (T) new SimpleHolder(new View(getActivity()), getActivity());
     }
 
     @Override
-    protected final void bindMoreViewHolder(RecyclerView.ViewHolder holder, int position, int viewType) {
+    protected final void bindMoreViewHolder(BaseHolder holder, int position, int viewType) {
 
         if (viewType == VIEW_TYPE_MORE) {
             mBtnRefresh.setOnClickListener(new OnClickListener() {
@@ -482,7 +476,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends As
      * 获取一个单元格占原始单元格的倍数（不能大于一行的列数）
      *
      * @param position 位置
-     * @return
+     * @return 表示实际一个单元格是原单元格的n倍
      */
     @Override
     public final int getSpanSize2(int position) {
@@ -540,7 +534,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends As
     /**
      * 是否启用滑动删除
      *
-     * @return
+     * @return 是否启用滑动删除
      */
     public final boolean isItemViewSwipeEnabled2(int position) {
         //判断如果是seciton 或者 更多 或者end
@@ -556,7 +550,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends As
      * 是否启用滑动删除 已经去除headerCount的position
      * 子类可以重写该方法
      *
-     * @return
+     * @return 是否启用滑动删除
      */
     public boolean isItemViewSwipeEnabled(int position) {
         return false;
@@ -582,7 +576,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends As
     /**
      * 是否启用长按拖拽
      *
-     * @return
+     * @return 是否启用长按拖拽
      */
     public final boolean isLongPressDragEnabled2(int position) {
         //判断如果是seciton 或者 更多 或者end
@@ -598,6 +592,8 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo> extends As
     /**
      * 是否启用长按拖拽 已经去除headerCount的position
      * 子类可以重写该方法
+     *
+     * @return 是否启用长按拖拽
      */
     public boolean isLongPressDragEnabled(int position) {
         return false;
