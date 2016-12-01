@@ -6,6 +6,7 @@ import android.widget.TextView;
 
 import com.mlr.demo.adapter.CommonListAdapter;
 import com.mlr.demo.data.DataServer;
+import com.mlr.demo.model.AppInfo;
 import com.mlr.mrecyclerview.BaseActivity;
 import com.mlr.mrecyclerview.MRecyclerView;
 import com.mlr.utils.LoadMoreListener;
@@ -43,9 +44,9 @@ public class CommonListActivity extends BaseActivity {
         commonListAdapter.removeHeaderView(headerView1);
 
         //加载更多数据
-        commonListAdapter.setLoadMoreListener(new LoadMoreListener() {
+        commonListAdapter.setLoadMoreListener(new LoadMoreListener<AppInfo>() {
             @Override
-            public int onLoadMoreRequested(List out, int startPosition, int requestSize) {
+            public int onLoadMoreRequested(List<AppInfo> out, int startPosition, int requestSize) {
                 if (count >= DataServer.MaxCount) {
                     LogUtils.e("mlr 没有更多数据");
                 } else {

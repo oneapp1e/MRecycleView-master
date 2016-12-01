@@ -135,6 +135,7 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout implements 
 
     /**
      * 设置下拉事件的监听
+     * @param listener OnPullEventListener
      */
     public void setOnPullEventListener(OnPullEventListener listener) {
         mOnPullEventListener = listener;
@@ -167,7 +168,6 @@ public class PullToRefreshRecyclerViewWrapper extends RelativeLayout implements 
      * @param pullResId       下拉文字
      * @param releaseResId    释放文字
      * @param refreshingResId 刷新文字
-     *                        一个项目中这个地方的方案应该是一致的，提供外部设置反而麻烦，修改为内部自动设置   liubin 2015-08-20
      */
     private void setHeaderTextResId(int pullResId, int releaseResId, int refreshingResId) {
         mHeaderLayout.setPullText(getContext().getString(pullResId));

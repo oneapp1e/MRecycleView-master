@@ -86,5 +86,12 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/activity_horizontal_margin"
             android:text="SwipeRefreshListView"/>
+
+        <Button
+            android:id="@+id/btn_animation_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
+            android:text="动画使用"/>
     </LinearLayout>
 </ScrollView>

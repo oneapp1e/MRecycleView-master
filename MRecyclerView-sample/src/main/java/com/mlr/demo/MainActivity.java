@@ -119,5 +119,14 @@ public class MainActivity extends BaseActivity {
                 startActivity(intent);
             }
         });
+
+        View btnAnimationList = findViewById(R.id.btn_animation_list);
+        btnAnimationList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, AnimationListActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }

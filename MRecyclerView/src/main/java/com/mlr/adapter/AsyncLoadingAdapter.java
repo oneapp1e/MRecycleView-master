@@ -98,10 +98,18 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
     // Getters
     // ==========================================================================
 
+    /**
+     * 是否启用更多
+     * @return boolean
+     */
     public boolean isMoreEnabled() {
         return mMoreEnabled;
     }
 
+    /**
+     * 获取Activity
+     * @return BaseActivity
+     */
     protected BaseActivity getActivity() {
         return mActivity;
     }
@@ -109,13 +117,19 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
     // ==========================================================================
     // Setters
     // ==========================================================================
+
+    /**
+     * {@link #mMoreEnabled}
+     * 是否启用
+     * @param enabled
+     */
     void setMoreEnabled(boolean enabled) {
         mMoreEnabled = enabled;
     }
 
     /**
      * 开启到底了试图 必须传入列表view
-     *
+     * {@link #mToEndEnabled},{@link #mRecyclerView}
      * @param enabled      enabled
      * @param recyclerView recyclerView
      */
@@ -124,6 +138,11 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
         mRecyclerView = recyclerView;
     }
 
+    /**
+     * {@link #mItemLimit}
+     * @param limit limit
+     * @return 是否限制
+     */
     public boolean setItemLimit(int limit) {
         if (limit == Integer.MAX_VALUE) {
             LogUtils.e("Item limit should be less than Integer.MAX_VALUE " + Integer.MAX_VALUE);

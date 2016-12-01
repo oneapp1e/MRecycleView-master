@@ -1,15 +1,26 @@
 package com.mlr.adapter;
 
+import android.animation.Animator;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Looper;
+import android.support.annotation.IntDef;
+import android.support.v7.widget.RecyclerView;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.mlr.animation.AlphaInAnimation;
+import com.mlr.animation.BaseAnimation;
+import com.mlr.animation.ScaleInAnimation;
+import com.mlr.animation.SlideInBottomAnimation;
+import com.mlr.animation.SlideInLeftAnimation;
+import com.mlr.animation.SlideInRightAnimation;
 import com.mlr.holder.BaseHolder;
 import com.mlr.holder.SimpleHolder;
 import com.mlr.model.ViewTypeInfo;
@@ -19,6 +30,8 @@ import com.mlr.utils.ISpanSizeLookup;
 import com.mlr.utils.LoadMoreListener;
 import com.mlr.utils.LogUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +45,7 @@ import java.util.Vector;
  * @param <T>    BaseHolder
  */
 public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends BaseHolder>
-        extends AsyncLoadingAdapter<T> implements ISpanSizeLookup, View.OnAttachStateChangeListener {
+        extends AsyncLoadingAdapter<T> implements ISpanSizeLookup {
     // ==========================================================================
     // Constants
     // ==========================================================================
@@ -90,7 +103,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     // ==========================================================================
     // Setters
     // ==========================================================================
-    protected void setHasMore(boolean hasMore) {
+    public void setHasMore(boolean hasMore) {
         mHasMore = hasMore;
     }
 
@@ -345,8 +358,6 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
         View v = getActivity().inflate(R.layout.list_load_more, parent, false);
         mBtnRefresh = (TextView) v.findViewById(R.id.btn_refresh);
         mSpinnerBg = (LinearLayout) v.findViewById(R.id.relative_spinner_bg);
-        v.findViewById(R.id.drawable_loading).removeOnAttachStateChangeListener(this);
-        v.findViewById(R.id.drawable_loading).addOnAttachStateChangeListener(this);
         return (T) new SimpleHolder(new View(getActivity()), getActivity());
     }
 
@@ -637,16 +648,153 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
 
 
     @Override
-    public final void onViewAttachedToWindow(View view) {
-        ((AnimationDrawable) (((ImageView) view).getDrawable())).start();
-    }
+    public final void onViewAttachedToWindow(T holder) {
+        int viewType = holder.getItemViewType();
+        if (viewType == VIEW_TYPE_MORE) {
+            ImageView loadingView = (ImageView) holder.itemView.findViewById(R.id.drawable_loading);
+            ((AnimationDrawable) loadingView.getDrawable()).start();
+        } else if (viewType == VIEW_TYPE_END
+                || (viewType >= VIEW_TYPE_HEAD_VIEW_ONE && viewType < VIEW_TYPE_HEAD_VIEW_ONE + getHeaderCount())) {
+            //不处理
+        } else {
+            addAnimation(holder);
+        }
 
-    @Override
-    public final void onViewDetachedFromWindow(View view) {
-        view.removeOnAttachStateChangeListener(this);
     }
 
     // ==========================================================================
-    // Inner/Nested Classes
+    // 以下是关于动画的处理
     // ==========================================================================
+    @IntDef({ALPHAIN, SCALEIN, SLIDEIN_BOTTOM, SLIDEIN_LEFT, SLIDEIN_RIGHT})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AnimationType {
+    }
+
+    /**
+     * Use with {@link #openLoadAnimation}
+     */
+    public static final int ALPHAIN = 0x00000001;
+    /**
+     * Use with {@link #openLoadAnimation}
+     */
+    public static final int SCALEIN = 0x00000002;
+    /**
+     * Use with {@link #openLoadAnimation}
+     */
+    public static final int SLIDEIN_BOTTOM = 0x00000003;
+    /**
+     * Use with {@link #openLoadAnimation}
+     */
+    public static final int SLIDEIN_LEFT = 0x00000004;
+    /**
+     * Use with {@link #openLoadAnimation}
+     */
+    public static final int SLIDEIN_RIGHT = 0x00000005;
+
+    /**
+     * 是否仅第一次启用动画
+     */
+    private boolean mFirstOnlyEnable = true;
+    /**
+     * 是否启用动画
+     */
+    private boolean mOpenAnimationEnable = false;
+    /**
+     * 动画加速器
+     */
+    private Interpolator mInterpolator = new LinearInterpolator();
+    private int mDuration = 300;
+    private int mLastPosition = -1;
+    //@AnimationType
+    private BaseAnimation mCustomAnimation;
+    private BaseAnimation mSelectAnimation = new AlphaInAnimation();
+
+    /**
+     * add animation when you want to show time
+     *
+     * @param holder
+     */
+    private void addAnimation(RecyclerView.ViewHolder holder) {
+        if (mOpenAnimationEnable) {
+            if (!mFirstOnlyEnable || holder.getLayoutPosition() > mLastPosition) {
+                BaseAnimation animation = null;
+                if (mCustomAnimation != null) {
+                    animation = mCustomAnimation;
+                } else {
+                    animation = mSelectAnimation;
+                }
+                for (Animator anim : animation.getAnimators(holder.itemView)) {
+                    startAnim(anim, holder.getLayoutPosition());
+                }
+                mLastPosition = holder.getLayoutPosition();
+            }
+        }
+    }
+
+    /**
+     * set anim to start when loading
+     *
+     * @param anim
+     * @param index
+     */
+    protected void startAnim(Animator anim, int index) {
+        anim.setDuration(mDuration).start();
+        anim.setInterpolator(mInterpolator);
+    }
+
+    /**
+     * Set the view animation type.
+     *
+     * @param animationType One of {@link #ALPHAIN}, {@link #SCALEIN}, {@link #SLIDEIN_BOTTOM}, {@link #SLIDEIN_LEFT}, {@link #SLIDEIN_RIGHT}.
+     */
+    public void openLoadAnimation(@AnimationType int animationType) {
+        this.mOpenAnimationEnable = true;
+        mCustomAnimation = null;
+        switch (animationType) {
+            case ALPHAIN:
+                mSelectAnimation = new AlphaInAnimation();
+                break;
+            case SCALEIN:
+                mSelectAnimation = new ScaleInAnimation();
+                break;
+            case SLIDEIN_BOTTOM:
+                mSelectAnimation = new SlideInBottomAnimation();
+                break;
+            case SLIDEIN_LEFT:
+                mSelectAnimation = new SlideInLeftAnimation();
+                break;
+            case SLIDEIN_RIGHT:
+                mSelectAnimation = new SlideInRightAnimation();
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Set Custom ObjectAnimator
+     *
+     * @param animation ObjectAnimator
+     */
+    public void openLoadAnimation(BaseAnimation animation) {
+        this.mOpenAnimationEnable = true;
+        this.mCustomAnimation = animation;
+    }
+
+    /**
+     * To open the animation when loading
+     */
+    public void openLoadAnimation() {
+        this.mOpenAnimationEnable = true;
+    }
+
+    /**
+     * {@link #addAnimation(RecyclerView.ViewHolder)}
+     *
+     * @param firstOnly true just show anim when first loading false show anim when load the data every time
+     */
+    public void isFirstOnly(boolean firstOnly) {
+        this.mFirstOnlyEnable = firstOnly;
+    }
+
 }
