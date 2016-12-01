@@ -10,7 +10,6 @@ import com.mlr.demo.data.DataServer;
 import com.mlr.demo.holder.AppInfoHolder;
 import com.mlr.demo.model.AppInfo;
 import com.mlr.mrecyclerview.BaseActivity;
-import com.mlr.utils.LogUtils;
 
 import java.util.List;
 
@@ -22,7 +21,6 @@ public class CommonGridAdapter extends MRecyclerViewAdapter<AppInfo, AppInfoHold
     // ==========================================================================
     // Constants
     // ==========================================================================
-    private int count = 0;
     // ==========================================================================
     // Fields
     // ==========================================================================
@@ -71,17 +69,6 @@ public class CommonGridAdapter extends MRecyclerViewAdapter<AppInfo, AppInfoHold
         });
     }
 
-    @Override
-    protected int getMoreData(List<AppInfo> out, int startPosition, int requestSize) {
-        if (count >= DataServer.MaxCount) {
-            LogUtils.e("mlr 没有更多数据");
-        } else {
-            LogUtils.e("mlr 请求更多数据");
-            out.addAll(DataServer.getCommonMoreData(requestSize));
-            count++;
-        }
-        return 200;
-    }
 
     // ==========================================================================
     // Inner/Nested Classes

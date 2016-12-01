@@ -16,6 +16,7 @@ import com.mlr.model.ViewTypeInfo;
 import com.mlr.mrecyclerview.BaseActivity;
 import com.mlr.mrecyclerview.R;
 import com.mlr.utils.ISpanSizeLookup;
+import com.mlr.utils.LoadMoreListener;
 import com.mlr.utils.LogUtils;
 
 import java.util.ArrayList;
@@ -43,6 +44,8 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     // Fields
     // ==========================================================================
     private List<Data> mItems;
+
+    private LoadMoreListener mLoadMoreListener;
 
     private volatile boolean mHasMore;
     /**
@@ -89,6 +92,10 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     // ==========================================================================
     protected void setHasMore(boolean hasMore) {
         mHasMore = hasMore;
+    }
+
+    public void setLoadMoreListener(LoadMoreListener loadMoreListener) {
+        mLoadMoreListener = loadMoreListener;
     }
 
     // ==========================================================================
@@ -384,7 +391,12 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
      * @param requestSize   请求数量
      * @return Status code
      */
-    protected abstract int getMoreData(List<Data> out, int startPosition, int requestSize);
+    public final int getMoreData(List<Data> out, int startPosition, int requestSize) {
+        if (mLoadMoreListener != null) {
+            return mLoadMoreListener.onLoadMoreRequested(out, startPosition, requestSize);
+        }
+        return -1;
+    }
 
     public void addHeaderView(View v) {
         addHeaderView(v, -1);

@@ -15,7 +15,6 @@ import com.mlr.holder.BaseHolder;
 import com.mlr.model.ViewTypeInfo;
 import com.mlr.mrecyclerview.BaseActivity;
 import com.mlr.mrecyclerview.SectionMRecyclerView;
-import com.mlr.utils.LogUtils;
 
 import java.util.List;
 
@@ -28,7 +27,6 @@ public class SectionListAdapter extends MRecyclerViewAdapter<ViewTypeInfo, BaseH
     // ==========================================================================
     // Constants
     // ==========================================================================
-    private int count = 0;
     // ==========================================================================
     // Fields
     // ==========================================================================
@@ -106,19 +104,6 @@ public class SectionListAdapter extends MRecyclerViewAdapter<ViewTypeInfo, BaseH
             });
         }
     }
-
-    @Override
-    protected int getMoreData(List<ViewTypeInfo> out, int startPosition, int requestSize) {
-        if (count >= DataServer.MaxCount) {
-            LogUtils.e("mlr 没有更多数据");
-        } else {
-            LogUtils.e("mlr 请求更多数据");
-            out.addAll(DataServer.getSectionMoreData(requestSize));
-            count++;
-        }
-        return 200;
-    }
-
 
     @Override
     public void onConfigurePinnedHeader(View header, int prevSectionViewTypePosition, int alpha) {
