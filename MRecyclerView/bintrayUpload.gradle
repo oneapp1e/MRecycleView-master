@@ -5,7 +5,7 @@ apply plugin: 'com.jfrog.bintray'
 //project
 def siteUrl = 'https://github.com/oneapp1e/MRecycleView-master' //项目官方网站的地址，没有的话就用Github上的地址
 def gitUrl = 'https://github.com/oneapp1e/MRecycleView-master.git'   //Git仓库的地址
-def projectName = 'MRecyclerView'//项目描述
+def projectName = 'MRecyclerView'//添加项目名称
 def projectUserOrg = 'mulinrui01' //这个是你创建时的organization,必须要有，不然没办法找到指定路径
 def projectRepo = 'maven' //这个仓库必须在 ‘maven’这个organization下，必须在网页上创建成功，否则还是无法找到 repo
 
@@ -16,7 +16,7 @@ def developerEmail='mulinrui@163.com'//你的邮箱
 
 
  group = "com.mlr"//发布aar前缀根节点
- version = "0.0.3"//发布aar的库版本
+ version = "0.0.4"//发布aar的库版本
 
 
 
