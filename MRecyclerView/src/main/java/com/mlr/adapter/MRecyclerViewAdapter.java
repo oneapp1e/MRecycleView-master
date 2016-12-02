@@ -3,8 +3,6 @@ package com.mlr.adapter;
 import android.animation.Animator;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Looper;
-import android.support.annotation.IntDef;
-import android.support.v7.widget.RecyclerView;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,8 +28,6 @@ import com.mlr.utils.ISpanSizeLookup;
 import com.mlr.utils.LoadMoreListener;
 import com.mlr.utils.LogUtils;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -531,8 +527,8 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     }
 
     /**
-     * SectionMRecyclerView 中有使用<br>
-     * 主要用于悬浮view只是sectionView的一部分<br>
+     * SectionMRecyclerView 中有使用
+     * 主要用于悬浮view只是sectionView的一部分
      * 如果使用的是SectionMRecyclerView 子类如果需要可以重写该方法控制sectionViewType的holder中view的显示隐藏
      *
      * @param firstSectionBelow sectionViewType对应的view
@@ -545,7 +541,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     }
 
     /**
-     * SectionMRecyclerView 中有使用<br>
+     * SectionMRecyclerView 中有使用
      * 子类必须重新改方法 设置SectionViewType
      *
      * @return int
@@ -665,29 +661,24 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     // ==========================================================================
     // 以下是关于动画的处理
     // ==========================================================================
-    @IntDef({ALPHAIN, SCALEIN, SLIDEIN_BOTTOM, SLIDEIN_LEFT, SLIDEIN_RIGHT})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface AnimationType {
-    }
-
     /**
-     * Use with {@link #openLoadAnimation}
+     * Use with {openLoadAnimation}
      */
     public static final int ALPHAIN = 0x00000001;
     /**
-     * Use with {@link #openLoadAnimation}
+     * Use with {openLoadAnimation}
      */
     public static final int SCALEIN = 0x00000002;
     /**
-     * Use with {@link #openLoadAnimation}
+     * Use with {openLoadAnimation}
      */
     public static final int SLIDEIN_BOTTOM = 0x00000003;
     /**
-     * Use with {@link #openLoadAnimation}
+     * Use with {openLoadAnimation}
      */
     public static final int SLIDEIN_LEFT = 0x00000004;
     /**
-     * Use with {@link #openLoadAnimation}
+     * Use with {openLoadAnimation}
      */
     public static final int SLIDEIN_RIGHT = 0x00000005;
 
@@ -705,7 +696,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     private Interpolator mInterpolator = new LinearInterpolator();
     private int mDuration = 300;
     private int mLastPosition = -1;
-    //@AnimationType
+    //
     private BaseAnimation mCustomAnimation;
     private BaseAnimation mSelectAnimation = new AlphaInAnimation();
 
@@ -714,7 +705,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
      *
      * @param holder
      */
-    private void addAnimation(RecyclerView.ViewHolder holder) {
+    private void addAnimation(T holder) {
         if (mOpenAnimationEnable) {
             if (!mFirstOnlyEnable || holder.getLayoutPosition() > mLastPosition) {
                 BaseAnimation animation = null;
@@ -745,9 +736,9 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     /**
      * Set the view animation type.
      *
-     * @param animationType One of {@link #ALPHAIN}, {@link #SCALEIN}, {@link #SLIDEIN_BOTTOM}, {@link #SLIDEIN_LEFT}, {@link #SLIDEIN_RIGHT}.
+     * @param animationType One of {ALPHAIN}, {SCALEIN}, {SLIDEIN_BOTTOM}, {SLIDEIN_LEFT}, {SLIDEIN_RIGHT}.
      */
-    public void openLoadAnimation(@AnimationType int animationType) {
+    public void openLoadAnimation(int animationType) {
         this.mOpenAnimationEnable = true;
         mCustomAnimation = null;
         switch (animationType) {
@@ -789,7 +780,6 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     }
 
     /**
-     * {@link #addAnimation(RecyclerView.ViewHolder)}
      *
      * @param firstOnly true just show anim when first loading false show anim when load the data every time
      */
