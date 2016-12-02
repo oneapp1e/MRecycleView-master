@@ -168,7 +168,7 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
      *
      * @return 每次加载更多时加载的项数
      */
-    int getIncrement() {
+    public int getIncrement() {
         return DEFAULT_INCREMENT;
     }
 
@@ -178,7 +178,7 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
      *
      * @return 预加载提前量
      */
-    private int getPreloadCount() {
+    public int getPreloadCount() {
         return DEFAULT_PRELOAD_COUNT;
     }
 
