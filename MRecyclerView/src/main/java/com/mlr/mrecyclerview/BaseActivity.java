@@ -2,19 +2,23 @@ package com.mlr.mrecyclerview;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
-import android.support.v7.widget.RecyclerView;
+import android.support.annotation.CallSuper;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class BaseActivity extends Activity {
+public class BaseActivity extends AppCompatActivity {
 
     // ==========================================================================
     // Constants
@@ -25,10 +29,13 @@ public class BaseActivity extends Activity {
     // ==========================================================================
     private LayoutInflater mInflater;
 
+    protected BaseActivity mActivity;
+
+    private static List<BaseActivity> activityList = new LinkedList<BaseActivity>();
+
     // ==========================================================================
     // Constructors
     // ==========================================================================
-
 
     // ==========================================================================
     // Getters
@@ -45,6 +52,7 @@ public class BaseActivity extends Activity {
         }
 
     };
+
     // ==========================================================================
     // Setters
     // ==========================================================================
@@ -101,6 +109,9 @@ public class BaseActivity extends Activity {
         return inflate(resId, null, false);
     }
 
+
+    //**********************资源相关start*****************************
+
     /**
      * 根据指定的layout索引，创建一个View
      *
@@ -114,24 +125,6 @@ public class BaseActivity extends Activity {
             return null;
         }
         return mInflater.inflate(resId, parent, attachToRoot);
-    }
-
-    public void refreshAdapterViewSafe(final RecyclerView.Adapter adapter) {
-        if (null == adapter) {
-            return;
-        }
-        if (Looper.getMainLooper() == Looper.myLooper()) {
-            // 调用在UI线程
-            adapter.notifyDataSetChanged();
-        } else {
-            // 调用在非UI线程
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    adapter.notifyDataSetChanged();
-                }
-            });
-        }
     }
 
 
@@ -182,7 +175,7 @@ public class BaseActivity extends Activity {
      * @param resId 资源id
      * @return 色值
      */
-    public int getColorRes(int resId) {
+    public int getResColor(int resId) {
         return getResources().getColor(resId);
     }
 
@@ -195,6 +188,10 @@ public class BaseActivity extends Activity {
     public int getDimensionPixel(int resId) {
         return getResources().getDimensionPixelSize(resId);
     }
+
+    //**********************资源相关end*****************************
+
+    //**********************事件相关start*****************************
 
     /**
      * 检测一个Motion事件是否在指定View的区域内
@@ -248,7 +245,79 @@ public class BaseActivity extends Activity {
 
         return relativeEvent;
     }
+    //**********************事件相关end*****************************
 
+    public boolean isLandscape() {
+        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+    }
+
+    //**********************生命周期相关start*****************************
+
+    protected BaseActivity getActivity() {
+        return mActivity;
+    }
+
+    public List<BaseActivity> getActivityList() {
+        return activityList;
+    }
+
+    /**
+     * 退出应用的时候调用
+     */
+    public void finishAll() {
+        for (Activity a : activityList) {
+            a.finish();
+        }
+        activityList.clear();
+    }
+
+    @CallSuper
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        mActivity = this;
+        super.onCreate(savedInstanceState);
+        activityList.add(this);
+        initInflater();
+    }
+
+    @CallSuper
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @CallSuper
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+    }
+
+    @CallSuper
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @CallSuper
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @CallSuper
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @CallSuper
+    @Override
+    protected void onDestroy() {
+        activityList.remove(this);
+        super.onDestroy();
+    }
+
+    //**********************生命周期相关end*****************************
     // ==========================================================================
     // Inner/Nested Classes
     // ==========================================================================

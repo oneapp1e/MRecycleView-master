@@ -38,6 +38,7 @@
             android:layout_weight="1"
             app:ms_background_color="@color/txt_color"
             app:ms_hide_arrow="true"
+            android:transitionName="@string/app_name"
             app:ms_text_color="#00ddb6"
         />
     </LinearLayout>

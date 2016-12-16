@@ -204,8 +204,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
             mHasMore = true;
             setMoreEnabled(true);
         }
-        // init();
-        getActivity().refreshAdapterViewSafe(this);
+        refreshAll();
     }
 
     public Data getItem(int position) {

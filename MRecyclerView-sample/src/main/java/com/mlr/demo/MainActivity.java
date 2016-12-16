@@ -1,7 +1,9 @@
 package com.mlr.demo;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.view.View;
 
 import com.mlr.mrecyclerview.BaseActivity;
@@ -120,13 +122,25 @@ public class MainActivity extends BaseActivity {
             }
         });
 
-        View btnAnimationList = findViewById(R.id.btn_animation_list);
+        final View btnAnimationList = findViewById(R.id.btn_animation_list);
         btnAnimationList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AnimationListActivity.class);
-                startActivity(intent);
+                startActivity(AnimationListActivity.class, btnAnimationList);
             }
         });
+    }
+
+
+    private void startActivity(Class cls, View view) {
+        Intent intent = new Intent(MainActivity.this, cls);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            ActivityOptionsCompat options = ActivityOptionsCompat
+                    .makeSceneTransitionAnimation(mActivity, view, getString(R.string.app_name));
+            startActivity(intent, options.toBundle());
+        } else {
+
+            startActivity(intent);
+        }
     }
 }

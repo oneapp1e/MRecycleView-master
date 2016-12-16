@@ -69,14 +69,14 @@ public class SectionListAdapter extends MRecyclerViewAdapter<ViewTypeInfo, BaseH
         if (viewType == DataServer.VIEW_TYPE_LIST) {
             return new AppInfoHolder(textView, getActivity());
         } else {
-            textView.setBackgroundColor(getActivity().getColorRes(R.color.colorAccent));
+            textView.setBackgroundColor(getActivity().getResColor(R.color.colorAccent));
             return new TitleInfoHolder(textView, getActivity());
         }
     }
 
     public TitleInfoHolder getPinnedHeaderHolder() {
         View textView = getActivity().inflate(R.layout.common_list_item);
-        textView.setBackgroundColor(getActivity().getColorRes(R.color.colorAccent));
+        textView.setBackgroundColor(getActivity().getResColor(R.color.colorAccent));
         TitleInfoHolder commonListHolder2 = new TitleInfoHolder(textView, getActivity());
         textView.setTag(commonListHolder2);
         return commonListHolder2;
