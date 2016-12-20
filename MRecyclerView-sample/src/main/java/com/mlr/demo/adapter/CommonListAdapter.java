@@ -8,7 +8,7 @@ import com.mlr.adapter.MRecyclerViewAdapter;
 import com.mlr.demo.R;
 import com.mlr.demo.holder.AppInfoHolder;
 import com.mlr.demo.model.AppInfo;
-import com.mlr.mrecyclerview.BaseActivity;
+import com.mlr.utils.BaseActivity;
 
 import java.util.List;
 

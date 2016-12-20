@@ -13,7 +13,7 @@ import com.mlr.demo.model.AppInfo;
 import com.mlr.demo.model.TitleInfo;
 import com.mlr.holder.BaseHolder;
 import com.mlr.model.ViewTypeInfo;
-import com.mlr.mrecyclerview.BaseActivity;
+import com.mlr.utils.BaseActivity;
 
 import java.util.List;
 

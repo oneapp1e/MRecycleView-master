@@ -2,7 +2,7 @@ package com.mlr.holder;
 
 import android.view.View;
 
-import com.mlr.mrecyclerview.BaseActivity;
+import com.mlr.utils.BaseActivity;
 
 
 public class SimpleHolder extends BaseHolder<String> {

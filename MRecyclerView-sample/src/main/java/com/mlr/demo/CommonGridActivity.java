@@ -6,8 +6,8 @@ import android.widget.TextView;
 
 import com.mlr.demo.adapter.CommonGridAdapter;
 import com.mlr.demo.data.DataServer;
-import com.mlr.mrecyclerview.BaseActivity;
 import com.mlr.mrecyclerview.MRecyclerView;
+import com.mlr.utils.BaseActivity;
 import com.mlr.utils.LoadMoreListener;
 import com.mlr.utils.LogUtils;
 

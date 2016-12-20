@@ -4,7 +4,7 @@ import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 
-import com.mlr.mrecyclerview.BaseActivity;
+import com.mlr.utils.BaseActivity;
 
 public abstract class BaseHolder<Data> extends ViewHolder {
     // ==========================================================================

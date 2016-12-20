@@ -6,7 +6,7 @@ import android.widget.TextView;
 import com.mlr.demo.R;
 import com.mlr.demo.model.TitleInfo;
 import com.mlr.holder.BaseHolder;
-import com.mlr.mrecyclerview.BaseActivity;
+import com.mlr.utils.BaseActivity;
 
 /**
  * Created by mulinrui on 2016/11/16.

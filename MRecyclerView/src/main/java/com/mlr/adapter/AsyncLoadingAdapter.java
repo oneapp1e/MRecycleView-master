@@ -7,9 +7,9 @@ import android.view.ViewGroup;
 
 import com.mlr.holder.BaseHolder;
 import com.mlr.holder.SimpleHolder;
-import com.mlr.mrecyclerview.BaseActivity;
 import com.mlr.mrecyclerview.MRecyclerView;
 import com.mlr.mrecyclerview.R;
+import com.mlr.utils.BaseActivity;
 import com.mlr.utils.LogUtils;
 
 
