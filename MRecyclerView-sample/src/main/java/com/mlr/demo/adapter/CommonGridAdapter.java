@@ -30,7 +30,7 @@ public class CommonGridAdapter extends MRecyclerViewAdapter<AppInfo, AppInfoHold
     // Constructors
     // ==========================================================================
 
-    public CommonGridAdapter(BaseActivity activity, List<? extends AppInfo> items) {
+    public CommonGridAdapter(BaseActivity activity, List<AppInfo> items) {
         super(activity, items);
     }
 

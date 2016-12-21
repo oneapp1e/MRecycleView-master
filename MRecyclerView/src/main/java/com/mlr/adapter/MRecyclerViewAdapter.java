@@ -71,7 +71,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     // ==========================================================================
     // Constructors
     // ==========================================================================
-    public MRecyclerViewAdapter(BaseActivity activity, List<? extends Data> items) {
+    public MRecyclerViewAdapter(BaseActivity activity, List<Data> items) {
         super(activity);
         mItems = new ArrayList<>();
         if (null != items) {
@@ -154,7 +154,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
         return !duplicate && mItems.add(item);
     }
 
-    private int appendData(List<? extends Data> data2) {
+    private int appendData(List<Data> data2) {
         if (null == data2) {
             return 0;
         }
@@ -163,7 +163,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
          * 重新复制一份数据，避免发生ConcurrentModificationException异常
          * liubin 2015-04-16
          */
-        final List<? extends Data> data = new ArrayList<>(data2);
+        final List<Data> data = new ArrayList<>(data2);
 
         int addedCount = 0;
         for (Data item : data) {
@@ -174,7 +174,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
         return addedCount;
     }
 
-    public final void setData(final List<? extends Data> data) {
+    public final void setData(final List<Data> data) {
         if (Looper.getMainLooper() == Looper.myLooper()) {
             // 调用在UI线程
             setDataInner(data);
@@ -191,7 +191,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
         }
     }
 
-    private void setDataInner(List<? extends Data> data) {
+    private void setDataInner(List<Data> data) {
         if (mItems != data) {
             mItems.clear();
             appendData(data);

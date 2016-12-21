@@ -4,9 +4,10 @@ import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 
+import com.mlr.model.ViewTypeInfo;
 import com.mlr.utils.BaseActivity;
 
-public abstract class BaseHolder<Data> extends ViewHolder {
+public abstract class BaseHolder<Data extends ViewTypeInfo> extends ViewHolder {
     // ==========================================================================
     // Constants
     // ==========================================================================
@@ -61,11 +62,12 @@ public abstract class BaseHolder<Data> extends ViewHolder {
 
     /**
      * 根据全局控制器，判断是否需要加载图片
+     *
      * @return
      */
     protected boolean isLoadImage() {
         // 大图模式和智能模式下，加载图片
-       return true;
+        return true;
     }
 
     // ==========================================================================

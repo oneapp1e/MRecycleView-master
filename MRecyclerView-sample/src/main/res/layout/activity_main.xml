@@ -93,5 +93,12 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/activity_horizontal_margin"
             android:text="动画使用"/>
+
+        <Button
+            android:id="@+id/btn_retrofit2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
+            android:text="retrofit2使用"/>
     </LinearLayout>
 </ScrollView>

@@ -132,6 +132,15 @@ public class MainActivity extends BaseActivity {
                 startActivity(AnimationListActivity.class, btnAnimationList);
             }
         });
+
+        final View btnRetrofit2 = findViewById(R.id.btn_retrofit2);
+        btnRetrofit2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, Retrofit2Activity.class);
+                startActivity(intent);
+            }
+        });
     }
 
 

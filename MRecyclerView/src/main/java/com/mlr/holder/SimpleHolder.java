@@ -2,10 +2,11 @@ package com.mlr.holder;
 
 import android.view.View;
 
+import com.mlr.model.ViewTypeInfo;
 import com.mlr.utils.BaseActivity;
 
 
-public class SimpleHolder extends BaseHolder<String> {
+public class SimpleHolder extends BaseHolder<ViewTypeInfo> {
 
     // ==========================================================================
     // Constants
