@@ -83,6 +83,9 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
                 mHasMore = true;
                 setMoreEnabled(true);
             }
+        } else {
+            mHasMore = true;
+            setMoreEnabled(true);
         }
         // 初始化moreView，以解决请求数据线程比UI线程跑得更快时，刷新UI造成的mBtnRefresh等控件空指针异常
         createMoreViewHolder(null, VIEW_TYPE_MORE);
@@ -353,12 +356,11 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
         View v = getActivity().inflate(R.layout.list_load_more, parent, false);
         mBtnRefresh = (TextView) v.findViewById(R.id.btn_refresh);
         mSpinnerBg = (LinearLayout) v.findViewById(R.id.relative_spinner_bg);
-        return (T) new SimpleHolder(new View(getActivity()), getActivity());
+        return (T) new SimpleHolder(v, getActivity());
     }
 
     @Override
     protected final void bindMoreViewHolder(BaseHolder holder, int position, int viewType) {
-
         if (viewType == VIEW_TYPE_MORE) {
             mBtnRefresh.setOnClickListener(new OnClickListener() {
 
@@ -779,7 +781,6 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     }
 
     /**
-     *
      * @param firstOnly true just show anim when first loading false show anim when load the data every time
      */
     public void isFirstOnly(boolean firstOnly) {
