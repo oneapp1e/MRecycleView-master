@@ -27,6 +27,8 @@ public class DragMoveGridActivity extends BaseActivity {
         DragMoveGridAdapter commonListAdapter = new DragMoveGridAdapter(this, DataServer.getCommonData(20));
         //启动到底了试图
         commonListAdapter.setToEndEnabled(true, rvCommonList);
+        //开启默认拖拽
+        commonListAdapter.setDefaultDrag(true);
         //添加headerView
         View headerView1 = createHeadView("headerView1");
         commonListAdapter.addHeaderView(headerView1);

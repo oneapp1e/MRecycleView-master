@@ -54,7 +54,6 @@ public class Retrofit2Activity extends BaseActivity implements NewsListView {
     @Override
     public void setNewList(List<NewsSummary> lists) {
         hideProgress();
-        LogUtils.e("lists:" + lists.toString());
         mRecyclerViewAdapter.setData(lists);
     }
 

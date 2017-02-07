@@ -68,6 +68,11 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
 
     private SparseArray<View> mHeaderViews = new SparseArray<>();
 
+    /**
+     * 是否开启默认拖拽 @link{DragAndMoveItemTouchHelperCallback} 默认不开启
+     */
+    private boolean isDefaultDrag = false;
+
     // ==========================================================================
     // Constructors
     // ==========================================================================
@@ -99,6 +104,10 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
         return mItems;
     }
 
+    public boolean isDefaultDrag() {
+        return isDefaultDrag;
+    }
+
     // ==========================================================================
     // Setters
     // ==========================================================================
@@ -108,6 +117,15 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
 
     public void setLoadMoreListener(LoadMoreListener loadMoreListener) {
         mLoadMoreListener = loadMoreListener;
+    }
+
+    /**
+     * 是否启动 默认的拖拽和移动 @link{DragAndMoveItemTouchHelperCallback}
+     *
+     * @param defaultDrag
+     */
+    public void setDefaultDrag(boolean defaultDrag) {
+        isDefaultDrag = defaultDrag;
     }
 
     // ==========================================================================
@@ -557,18 +575,21 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
      * @return 是否启用滑动删除
      */
     public final boolean isItemViewSwipeEnabled2(int position) {
-        //判断如果是seciton 或者 更多 或者end
-        int viewType = getItemViewType(position);
-        if (viewType == VIEW_TYPE_MORE || viewType == VIEW_TYPE_END
-                || (viewType >= VIEW_TYPE_HEAD_VIEW_ONE && viewType < VIEW_TYPE_HEAD_VIEW_ONE + getHeaderCount())) {
-            return false;
+        if (isDefaultDrag) {
+            //判断如果是seciton 或者 更多 或者end
+            int viewType = getItemViewType(position);
+            if (viewType == VIEW_TYPE_MORE || viewType == VIEW_TYPE_END
+                    || (viewType >= VIEW_TYPE_HEAD_VIEW_ONE && viewType < VIEW_TYPE_HEAD_VIEW_ONE + getHeaderCount())) {
+                return false;
+            }
+            return isItemViewSwipeEnabled(position - getHeaderCount());
         }
-        return isItemViewSwipeEnabled(position - getHeaderCount());
+        return false;
     }
 
     /**
      * 是否启用滑动删除 已经去除headerCount的position
-     * 子类可以重写该方法
+     * 如果开启自己写的拖拽{@link #isDefaultDrag}，子类可以重写该方法判断
      *
      * @return 是否启用滑动删除
      */
@@ -599,19 +620,23 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
      * @return 是否启用长按拖拽
      */
     public final boolean isLongPressDragEnabled2(int position) {
-        //判断如果是seciton 或者 更多 或者end
-        int viewType = getItemViewType(position);
-        if (viewType == VIEW_TYPE_MORE || viewType == VIEW_TYPE_END
-                || (viewType >= VIEW_TYPE_HEAD_VIEW_ONE && viewType < VIEW_TYPE_HEAD_VIEW_ONE + getHeaderCount())) {
-            return false;
-        } else {
-            return isLongPressDragEnabled(position - getHeaderCount());
+        if (isDefaultDrag) {
+            //判断如果是seciton 或者 更多 或者end
+            int viewType = getItemViewType(position);
+            if (viewType == VIEW_TYPE_MORE || viewType == VIEW_TYPE_END
+                    || (viewType >= VIEW_TYPE_HEAD_VIEW_ONE && viewType < VIEW_TYPE_HEAD_VIEW_ONE + getHeaderCount())) {
+                return false;
+            } else {
+                return isLongPressDragEnabled(position - getHeaderCount());
+            }
         }
+
+        return false;
     }
 
     /**
      * 是否启用长按拖拽 已经去除headerCount的position
-     * 子类可以重写该方法
+     * 如果开启自己写的拖拽{@link #isDefaultDrag}，子类可以重写该方法判断
      *
      * @return 是否启用长按拖拽
      */

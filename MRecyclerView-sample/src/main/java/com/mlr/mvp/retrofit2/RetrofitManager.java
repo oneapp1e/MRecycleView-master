@@ -10,7 +10,6 @@ import com.mlr.utils.NetworkUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -20,6 +19,7 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -78,13 +78,18 @@ public class RetrofitManager {
                 Cache cache = new Cache(new File(MyApplication.getAppContext().getCacheDir(), "HttpCache"),
                         1024 * 1024 * 100);
                 if (sOkHttpClient == null) {
+                    //设置log日志级别
+                    mHttpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
                     sOkHttpClient = new OkHttpClient.Builder().cache(cache)
                             .connectTimeout(6, TimeUnit.SECONDS)
                             .readTimeout(6, TimeUnit.SECONDS)
                             .writeTimeout(6, TimeUnit.SECONDS)
                             .addInterceptor(mRewriteCacheControlInterceptor)
                             .addNetworkInterceptor(mRewriteCacheControlInterceptor)
-                            .addInterceptor(mLoggingInterceptor).build();
+                            .addInterceptor(mHttpLoggingInterceptor)
+//                            .addInterceptor(mLoggingInterceptor)
+                            .build();
                 }
             }
         }
@@ -124,19 +129,26 @@ public class RetrofitManager {
     };
 
 
-    private final Interceptor mLoggingInterceptor = new Interceptor() {
+//    private final Interceptor mLoggingInterceptor = new Interceptor() {
+//        @Override
+//        public Response intercept(Chain chain) throws IOException {
+//            Request request = chain.request();
+//            long t1 = System.nanoTime();
+//            LogUtils.i(String.format("testbbs Sending request %s on %s%n%s", request.url(), chain.connection(), request.headers()));
+//            Response response = chain.proceed(request);
+//            long t2 = System.nanoTime();
+//            LogUtils.i(String.format(Locale.getDefault(), "testbbs Received response for %s in %.1fms%n%s",
+//                    response.request().url(), (t2 - t1) / 1e6d, response.headers()));
+//            return response;
+//        }
+//    };
+
+    private final HttpLoggingInterceptor mHttpLoggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
         @Override
-        public Response intercept(Chain chain) throws IOException {
-            Request request = chain.request();
-            long t1 = System.nanoTime();
-            LogUtils.i(String.format("testbbs Sending request %s on %s%n%s", request.url(), chain.connection(), request.headers()));
-            Response response = chain.proceed(request);
-            long t2 = System.nanoTime();
-            LogUtils.i(String.format(Locale.getDefault(), "testbbs Received response for %s in %.1fms%n%s",
-                    response.request().url(), (t2 - t1) / 1e6d, response.headers()));
-            return response;
+        public void log(String message) {
+            LogUtils.e("mlr message:" + message);
         }
-    };
+    });
 
     /**
      * 根据网络状况获取缓存的策略

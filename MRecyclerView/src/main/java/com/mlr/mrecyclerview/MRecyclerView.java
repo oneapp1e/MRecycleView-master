@@ -82,7 +82,7 @@ public class MRecyclerView extends RecyclerView {
         return (MRecyclerViewAdapter) super.getAdapter();
     }
 
-    // ==========================================================================
+// ==========================================================================
     // Setters
     // ==========================================================================
 
@@ -112,11 +112,14 @@ public class MRecyclerView extends RecyclerView {
         if (adapter instanceof MRecyclerViewAdapter) {
             setISpanSizeLookup((MRecyclerViewAdapter) adapter);
 
-            //注册拖拽
-            LogUtils.e("mlr setAdapter 注册拖拽");
-            ItemTouchHelper.Callback callback = new DragAndMoveItemTouchHelperCallback((MRecyclerViewAdapter) adapter);
-            ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
-            touchHelper.attachToRecyclerView(this);
+            if (((MRecyclerViewAdapter) adapter).isDefaultDrag()) {
+                //注册拖拽
+                LogUtils.e("mlr setAdapter 注册拖拽");
+                ItemTouchHelper.Callback callback = new DragAndMoveItemTouchHelperCallback((MRecyclerViewAdapter) adapter);
+                ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+                touchHelper.attachToRecyclerView(this);
+            }
+
         }
         if (adapter instanceof ISpanSizeLookup) {
             setSpanCount(((ISpanSizeLookup) adapter).getSpanCount());
