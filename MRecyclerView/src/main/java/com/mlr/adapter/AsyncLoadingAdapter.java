@@ -1,7 +1,9 @@
 package com.mlr.adapter;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -9,8 +11,7 @@ import com.mlr.holder.BaseHolder;
 import com.mlr.holder.SimpleHolder;
 import com.mlr.mrecyclerview.MRecyclerView;
 import com.mlr.mrecyclerview.R;
-import com.mlr.utils.BaseActivity;
-import com.mlr.utils.LogUtils;
+import com.mlr.utils.LogUtil;
 
 
 /**
@@ -80,15 +81,15 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
     /**
      * 滚动列表
      */
-    private MRecyclerView mRecyclerView;
+    protected MRecyclerView mRecyclerView;
 
-    private BaseActivity mActivity;
+    private Context mContext;
 
     // ==========================================================================
     // Constructors
     // ==========================================================================
-    AsyncLoadingAdapter(BaseActivity activity) {
-        mActivity = activity;
+    AsyncLoadingAdapter(Context context) {
+        mContext = context;
         mLoading = false;
         mMoreEnabled = true;
         mItemLimit = ITEM_COUNT_LIMIT;
@@ -100,6 +101,7 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
 
     /**
      * 是否启用更多
+     *
      * @return boolean
      */
     public boolean isMoreEnabled() {
@@ -107,11 +109,18 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
     }
 
     /**
-     * 获取Activity
-     * @return BaseActivity
+     * context
      */
-    protected BaseActivity getActivity() {
-        return mActivity;
+    protected Context getContext() {
+        return mContext;
+    }
+
+    /**
+     * inflater
+     * @return
+     */
+    protected LayoutInflater getInflater() {
+        return LayoutInflater.from(getContext());
     }
 
     // ==========================================================================
@@ -121,6 +130,7 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
     /**
      * {@link #mMoreEnabled}
      * 是否启用
+     *
      * @param enabled
      */
     void setMoreEnabled(boolean enabled) {
@@ -130,6 +140,7 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
     /**
      * 开启到底了试图 必须传入列表view
      * {@link #mToEndEnabled},{@link #mRecyclerView}
+     *
      * @param enabled      enabled
      * @param recyclerView recyclerView
      */
@@ -140,12 +151,13 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
 
     /**
      * {@link #mItemLimit}
+     *
      * @param limit limit
      * @return 是否限制
      */
     public boolean setItemLimit(int limit) {
         if (limit == Integer.MAX_VALUE) {
-            LogUtils.e("Item limit should be less than Integer.MAX_VALUE " + Integer.MAX_VALUE);
+            LogUtil.e("Item limit should be less than Integer.MAX_VALUE " + Integer.MAX_VALUE);
             return false;
         }
         mItemLimit = limit;
@@ -224,8 +236,8 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
      * @return ViewHolder
      */
     private T createEndViewHolder(ViewGroup parent, int viewType) {
-        View v = getActivity().inflate(R.layout.list_to_end, parent, false);
-        return (T) new SimpleHolder(v, getActivity());
+        View v = getInflater().inflate(R.layout.list_to_end, parent, false);
+        return (T) new SimpleHolder(v, getContext());
     }
 
     /**
@@ -259,11 +271,11 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
                 int increment = Math.min(getIncrement(), getItemLimit() - getCount());
                 int checkCount = 0;
                 while (!readyForLoadMore(itemCount, increment) && checkCount++ < MAX_BLOCK_LOOP_CNT) {
-                    LogUtils.w("Block load more until ready!");
+                    LogUtil.w("Block load more until ready!");
                     try {
                         Thread.sleep(CHECK_BLOCK_INTERVAL);
                     } catch (Exception e) {
-                        LogUtils.e(e);
+                        LogUtil.e(e);
                     }
                 }
                 onLoadMore(itemCount, increment);
@@ -336,7 +348,7 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
             if (mRecyclerView != null) {
                 firstVisibleItem = mRecyclerView.getChildCount() <= 0 ? 0 : mRecyclerView.getLayoutManager().findFirstVisibleItemPosition();
             }
-            LogUtils.e("traceToEnd  firstVisibleItem:" + firstVisibleItem);
+            LogUtil.e("traceToEnd  firstVisibleItem:" + firstVisibleItem);
             // 到底视图可用时 往上滑动 数据需要重刷
             if (firstVisibleItem > 0) {
                 mCanScrollUp = true;
@@ -386,8 +398,8 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
         }
 
         if (viewHolder == null) {
-            LogUtils.e("Found NULL view at " + viewType + "!", new Exception());
-            return (T) new SimpleHolder(new View(getActivity()), getActivity());
+            LogUtil.e("Found NULL view at " + viewType + "!", new Exception());
+            return (T) new SimpleHolder(new View(getContext()), getContext());
         }
         return viewHolder;
     }

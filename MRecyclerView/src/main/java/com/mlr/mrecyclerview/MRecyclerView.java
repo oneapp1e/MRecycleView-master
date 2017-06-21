@@ -13,7 +13,7 @@ import android.view.MotionEvent;
 import com.mlr.adapter.MRecyclerViewAdapter;
 import com.mlr.utils.DragAndMoveItemTouchHelperCallback;
 import com.mlr.utils.ISpanSizeLookup;
-import com.mlr.utils.LogUtils;
+import com.mlr.utils.LogUtil;
 
 
 /**
@@ -114,7 +114,7 @@ public class MRecyclerView extends RecyclerView {
 
             if (((MRecyclerViewAdapter) adapter).isDefaultDrag()) {
                 //注册拖拽
-                LogUtils.e("mlr setAdapter 注册拖拽");
+                LogUtil.e("mlr setAdapter 注册拖拽");
                 ItemTouchHelper.Callback callback = new DragAndMoveItemTouchHelperCallback((MRecyclerViewAdapter) adapter);
                 ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
                 touchHelper.attachToRecyclerView(this);
@@ -158,7 +158,7 @@ public class MRecyclerView extends RecyclerView {
         try {
             return super.dispatchKeyEvent(event);
         } catch (Throwable t) {
-            LogUtils.e(t);
+            LogUtil.e(t);
             return false;
         }
     }
@@ -169,7 +169,7 @@ public class MRecyclerView extends RecyclerView {
         try {
             return super.dispatchTouchEvent(ev);
         } catch (Throwable t) {
-            LogUtils.e(t);
+            LogUtil.e(t);
             return false;
         }
     }
@@ -179,7 +179,7 @@ public class MRecyclerView extends RecyclerView {
         try {
             super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
         } catch (Throwable t) {
-            LogUtils.e(t);
+            LogUtil.e(t);
         }
     }
 

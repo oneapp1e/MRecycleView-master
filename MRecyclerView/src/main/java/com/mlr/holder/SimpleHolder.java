@@ -1,9 +1,9 @@
 package com.mlr.holder;
 
+import android.content.Context;
 import android.view.View;
 
 import com.mlr.model.ViewTypeInfo;
-import com.mlr.utils.BaseActivity;
 
 
 public class SimpleHolder extends BaseHolder<ViewTypeInfo> {
@@ -20,8 +20,8 @@ public class SimpleHolder extends BaseHolder<ViewTypeInfo> {
     // Constructors
     // ==========================================================================
 
-    public SimpleHolder(View itemView, BaseActivity activity) {
-        super(itemView, activity);
+    public SimpleHolder(View itemView, Context context) {
+        super(itemView, context);
     }
 
     // ==========================================================================

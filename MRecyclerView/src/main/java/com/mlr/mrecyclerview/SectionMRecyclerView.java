@@ -18,7 +18,7 @@ import android.widget.AbsListView;
 import android.widget.Scroller;
 
 import com.mlr.adapter.MRecyclerViewAdapter;
-import com.mlr.utils.LogUtils;
+import com.mlr.utils.LogUtil;
 
 public class SectionMRecyclerView extends MRecyclerView {
     // ==========================================================================
@@ -383,7 +383,7 @@ public class SectionMRecyclerView extends MRecyclerView {
             try {
                 measureChild(mPinnedHeaderView, mWidthMeasureSpec, mHeightMeasureSpec);
             } catch (ArrayIndexOutOfBoundsException e) {
-                LogUtils.e(e);
+                LogUtil.e(e);
             }
             mPinnedHeaderViewWidth = mPinnedHeaderView.getMeasuredWidth();
             mPinnedHeaderViewHeight = mPinnedHeaderView.getMeasuredHeight();
@@ -507,10 +507,10 @@ public class SectionMRecyclerView extends MRecyclerView {
                             firstSectionBelow = firstSectionBelowOverlay;
                             mSrcAdapter.setSectionHeaderVisible(firstSectionBelow, View.INVISIBLE);
                             if (!gesture_up) {// 向下滑动
-                                // LogUtils.i("offset ==0,firstSectionBelow.getTop()="+firstSectionBelow.getTop());
+                                // LogUtil.i("offset ==0,firstSectionBelow.getTop()="+firstSectionBelow.getTop());
                                 if (firstSectionBelow != null && firstSectionBelow.getTop() == 0) {// 跟随手指移动
                                     // firstSectionBelow.setVisibility(View.VISIBLE);
-                                    // LogUtils.i("firstSectionBelow.getTop="+firstSectionBelow.getTop());
+                                    // LogUtil.i("firstSectionBelow.getTop="+firstSectionBelow.getTop());
                                     mSrcAdapter.setSectionHeaderVisible(firstSectionBelow,
                                             View.VISIBLE);
                                 }
@@ -645,7 +645,7 @@ public class SectionMRecyclerView extends MRecyclerView {
             }
         } catch (Exception e) {
             // dispatchDraw may throw NullPointerException
-            LogUtils.e(e);
+            LogUtil.e(e);
         }
 
     }

@@ -1,8 +1,10 @@
 package com.mlr.adapter;
 
 import android.animation.Animator;
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
-import android.os.Looper;
+import android.support.v7.widget.RecyclerView;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -22,11 +24,11 @@ import com.mlr.animation.SlideInRightAnimation;
 import com.mlr.holder.BaseHolder;
 import com.mlr.holder.SimpleHolder;
 import com.mlr.model.ViewTypeInfo;
+import com.mlr.mrecyclerview.MRecyclerView;
 import com.mlr.mrecyclerview.R;
-import com.mlr.utils.BaseActivity;
 import com.mlr.utils.ISpanSizeLookup;
 import com.mlr.utils.LoadMoreListener;
-import com.mlr.utils.LogUtils;
+import com.mlr.utils.LogUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,8 +78,8 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     // ==========================================================================
     // Constructors
     // ==========================================================================
-    public MRecyclerViewAdapter(BaseActivity activity, List<Data> items) {
-        super(activity);
+    public MRecyclerViewAdapter(Context context, List<Data> items) {
+        super(context);
         mItems = new ArrayList<>();
         if (null != items) {
             appendData(items);
@@ -132,6 +134,14 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     // Methods
     // ==========================================================================
 
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        if (recyclerView instanceof MRecyclerView) {
+            this.mRecyclerView = (MRecyclerView) recyclerView;
+        }
+    }
+
     /**
      * 阻塞更多项的加载
      */
@@ -147,18 +157,12 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     }
 
     public void refreshAll() {
-        if (Looper.getMainLooper() == Looper.myLooper()) {
-            // 调用在UI线程
-            notifyDataSetChanged();
-        } else {
-            // 调用在非UI线程
-            getActivity().post(new Runnable() {
-                @Override
-                public void run() {
-                    notifyDataSetChanged();
-                }
-            });
-        }
+        ((Activity) getContext()).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
     }
 
     private boolean addUniqueItem(Data item) {
@@ -193,20 +197,15 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     }
 
     public final void setData(final List<Data> data) {
-        if (Looper.getMainLooper() == Looper.myLooper()) {
-            // 调用在UI线程
-            setDataInner(data);
-        } else {
-            // 调用在非UI线程
-            getActivity().post(new Runnable() {
+        // 调用在非UI线程
+        ((Activity) getContext()).runOnUiThread(new Runnable() {
 
-                @Override
-                public void run() {
-                    setDataInner(data);
-                }
+            @Override
+            public void run() {
+                setDataInner(data);
+            }
 
-            });
-        }
+        });
     }
 
     private void setDataInner(List<Data> data) {
@@ -266,7 +265,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     private final int getItemType(int position) {
         if (getItem(position).getViewType() < VIEW_TYPE_ITEM ||
                 getItem(position).getViewType() >= VIEW_TYPE_HEAD_VIEW_ONE) {
-            LogUtils.e("mlr getItemType position:" + position + " viewType:" + getItem(position).getViewType());
+            LogUtil.e("mlr getItemType position:" + position + " viewType:" + getItem(position).getViewType());
             throw new RuntimeException("ViewType没有设置啊，请调用setViewType设置大于等于3小于1000的ViewType");
         }
         return getItem(position).getViewType();
@@ -278,7 +277,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
             if (mHeaderViews.get(viewType) == null) {
                 throw new RuntimeException("HeaderView 为空了，请检查headerView的添加");
             } else {
-                return (T) new SimpleHolder(mHeaderViews.get(viewType), getActivity());
+                return (T) new SimpleHolder(mHeaderViews.get(viewType), getContext());
             }
         }
         return createItemHolder(parent, viewType);
@@ -297,10 +296,10 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     protected final void bindItemViewHolder(T holder, int position, int viewType) {
         if (viewType >= VIEW_TYPE_HEAD_VIEW_ONE && viewType < VIEW_TYPE_HEAD_VIEW_ONE + mHeaderViews.size()) {
             //headerView不处理
-            LogUtils.v("bindItemViewHolder headerView不处理");
+            LogUtil.v("bindItemViewHolder headerView不处理");
         } else if (viewType == VIEW_TYPE_MORE || viewType == VIEW_TYPE_END) {
             //更多 或者 底部到底了  不处理
-            LogUtils.v("bindItemViewHolder 更多 或者 底部到底了 不处理");
+            LogUtil.v("bindItemViewHolder 更多 或者 底部到底了 不处理");
         } else {
             //此处已经去除headerview数量  子类不需要处理
             bindItemHolder(holder, position - getHeaderCount(), viewType);
@@ -328,7 +327,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
 
     @Override
     protected int onLoadMore(int startPosition, int requestSize) {
-        LogUtils.e("mlr Req startPosition:" + startPosition + " requestSize:" + requestSize);
+        LogUtil.e("mlr Req startPosition:" + startPosition + " requestSize:" + requestSize);
         List<Data> moreItems = new Vector<>(requestSize);
         int responseSize;
         int addedCount = 0;
@@ -337,12 +336,12 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
         if (responseSize > 0) {
             addedCount = appendData(moreItems);
         }
-        LogUtils.e("mlr Rsp responseSize:" + responseSize + " mItems.size():" + mItems.size());
+        LogUtil.e("mlr Rsp responseSize:" + responseSize + " mItems.size():" + mItems.size());
 
         if (responseSize >= requestSize || !isMoreLoaded(statusCode)) {
             mHasMore = true;
             if (!isMoreLoaded(statusCode)) {
-                getActivity().post(new Runnable() {
+                ((Activity) getContext()).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         setMoreEnabled(mHasMore);
@@ -371,10 +370,10 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
 
     @Override
     public final T createMoreViewHolder(ViewGroup parent, int viewType) {
-        View v = getActivity().inflate(R.layout.list_load_more, parent, false);
+        View v = getInflater().inflate(R.layout.list_load_more, parent, false);
         mBtnRefresh = (TextView) v.findViewById(R.id.btn_refresh);
         mSpinnerBg = (LinearLayout) v.findViewById(R.id.relative_spinner_bg);
-        return (T) new SimpleHolder(v, getActivity());
+        return (T) new SimpleHolder(v, getContext());
     }
 
     @Override
@@ -605,7 +604,8 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     public final void onItemDismiss(int position) {
         mItems.remove(position - getHeaderCount());
         notifyItemRemoved(position);
-        getActivity().postDelayed(new Runnable() {
+
+        mRecyclerView.postDelayed(new Runnable() {
             @Override
             public void run() {
                 notifyDataSetChanged();
@@ -651,7 +651,7 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
      * @param to   结束位置
      */
     public final void onItemMoved(int from, int to) {
-        LogUtils.e("mlr onItemMoved from:" + from + "  to:" + to + "  mItems.size():" + mItems.size());
+        LogUtil.e("mlr onItemMoved from:" + from + "  to:" + to + "  mItems.size():" + mItems.size());
         //如果适配器索引值大于数据集合的索引值 说明子类有其他处理 那么此处不进行移动  子类可以重新该方法
         if (from > getCount() - 1 || to > getCount() - 1) {
             return;

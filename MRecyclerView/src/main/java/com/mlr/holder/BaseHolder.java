@@ -1,11 +1,11 @@
 package com.mlr.holder;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 
 import com.mlr.model.ViewTypeInfo;
-import com.mlr.utils.BaseActivity;
 
 public abstract class BaseHolder<Data extends ViewTypeInfo> extends ViewHolder {
     // ==========================================================================
@@ -15,28 +15,28 @@ public abstract class BaseHolder<Data extends ViewTypeInfo> extends ViewHolder {
     // ==========================================================================
     // Fields
     // ==========================================================================
-    protected BaseActivity mActivity;
+    protected Context mContext;
 
     private Data mData;
 
     // ==========================================================================
     // Constructors
     // ==========================================================================
-    public BaseHolder(View itemView, BaseActivity activity) {
-        this(itemView, activity, null);
+    public BaseHolder(View itemView, Context context) {
+        this(itemView, context, null);
     }
 
-    public BaseHolder(View itemView, BaseActivity activity, Data data) {
+    public BaseHolder(View itemView, Context context, Data data) {
         super(itemView);
-        mActivity = activity;
+        mContext = context;
         mData = data;
     }
 
     // ==========================================================================
     // Getters
     // ==========================================================================
-    public BaseActivity getActivity() {
-        return mActivity;
+    public Context getContext() {
+        return mContext;
     }
 
     // ==========================================================================
@@ -56,7 +56,7 @@ public abstract class BaseHolder<Data extends ViewTypeInfo> extends ViewHolder {
     }
 
     public Resources getThemeResources() {
-        return mActivity.getResources();
+        return mContext.getResources();
     }
 
 
