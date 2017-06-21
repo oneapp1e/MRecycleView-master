@@ -7,6 +7,7 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.view.View;
 
 import com.mlr.utils.BaseActivity;
+import com.taobao.sophix.SophixManager;
 
 
 public class MainActivity extends BaseActivity {
@@ -18,6 +19,7 @@ public class MainActivity extends BaseActivity {
 
         initLoadingAndRetryManager();
         hideProgress();
+        SophixManager.getInstance().queryAndLoadNewPatch();
 
         View btnCommonList = findViewById(R.id.btn_common_list);
         btnCommonList.setOnClickListener(new View.OnClickListener() {
@@ -148,7 +150,7 @@ public class MainActivity extends BaseActivity {
         Intent intent = new Intent(MainActivity.this, cls);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ActivityOptionsCompat options = ActivityOptionsCompat
-                    .makeSceneTransitionAnimation(mActivity, view, getString(R.string.app_name));
+                    .makeSceneTransitionAnimation(this, view, getString(R.string.app_name));
             startActivity(intent, options.toBundle());
         } else {
 

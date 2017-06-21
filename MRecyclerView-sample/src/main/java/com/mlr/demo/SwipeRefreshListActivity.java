@@ -2,6 +2,7 @@ package com.mlr.demo;
 
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
@@ -69,7 +70,7 @@ public class SwipeRefreshListActivity extends BaseActivity {
             @Override
             public void onRefresh() {
                 LogUtils.e("testbbs setOnRefreshListener  onRefresh");
-                postDelayed(new Runnable() {
+                swipeRefreshLayout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         commonListAdapter.getData().clear();
@@ -83,7 +84,7 @@ public class SwipeRefreshListActivity extends BaseActivity {
     }
 
     private View createHeadView(String headerText) {
-        View inflate = inflate(R.layout.common_list_item);
+        View inflate = LayoutInflater.from(this).inflate(R.layout.common_list_item, null, false);
         TextView textView = (TextView) inflate.findViewById(R.id.tweetText);
         textView.setText(headerText);
         return inflate;

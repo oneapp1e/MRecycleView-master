@@ -15,6 +15,7 @@ import com.mlr.holder.BaseHolder;
 import com.mlr.model.ViewTypeInfo;
 import com.mlr.mrecyclerview.SectionMRecyclerView;
 import com.mlr.utils.BaseActivity;
+import com.mlr.utils.ResourceUtils;
 
 import java.util.List;
 
@@ -65,19 +66,19 @@ public class SectionListAdapter extends MRecyclerViewAdapter<ViewTypeInfo, BaseH
     // ==========================================================================
     @Override
     protected BaseHolder createItemHolder(ViewGroup parent, int viewType) {
-        View textView = getActivity().inflate(R.layout.common_list_item, parent, false);
+        View textView = getInflater().inflate(R.layout.common_list_item, parent, false);
         if (viewType == DataServer.VIEW_TYPE_LIST) {
-            return new AppInfoHolder(textView, getActivity());
+            return new AppInfoHolder(textView, getContext());
         } else {
-            textView.setBackgroundColor(getActivity().getResColor(R.color.colorAccent));
-            return new TitleInfoHolder(textView, getActivity());
+            textView.setBackgroundColor(ResourceUtils.getResColor(getContext(), R.color.colorAccent));
+            return new TitleInfoHolder(textView, getContext());
         }
     }
 
     public TitleInfoHolder getPinnedHeaderHolder() {
-        View textView = getActivity().inflate(R.layout.common_list_item);
-        textView.setBackgroundColor(getActivity().getResColor(R.color.colorAccent));
-        TitleInfoHolder commonListHolder2 = new TitleInfoHolder(textView, getActivity());
+        View textView = getInflater().inflate(R.layout.common_list_item, null, false);
+        textView.setBackgroundColor(ResourceUtils.getResColor(getContext(), R.color.colorAccent));
+        TitleInfoHolder commonListHolder2 = new TitleInfoHolder(textView, getContext());
         textView.setTag(commonListHolder2);
         return commonListHolder2;
     }
@@ -90,7 +91,7 @@ public class SectionListAdapter extends MRecyclerViewAdapter<ViewTypeInfo, BaseH
             ((AppInfoHolder) holder).itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(getActivity(), getData().get(position) + "  position:" + position, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getData().get(position) + "  position:" + position, Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
@@ -99,7 +100,7 @@ public class SectionListAdapter extends MRecyclerViewAdapter<ViewTypeInfo, BaseH
             ((TitleInfoHolder) holder).itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(getActivity(), getData().get(position) + "  position:" + position, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getData().get(position) + "  position:" + position, Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -127,7 +128,7 @@ public class SectionListAdapter extends MRecyclerViewAdapter<ViewTypeInfo, BaseH
                 return;
             }
 
-            Toast.makeText(getActivity(), "onPinnedHeaderClick  title:" + ((TitleInfo) obj).getTitle(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "onPinnedHeaderClick  title:" + ((TitleInfo) obj).getTitle(), Toast.LENGTH_SHORT).show();
         }
     }
 

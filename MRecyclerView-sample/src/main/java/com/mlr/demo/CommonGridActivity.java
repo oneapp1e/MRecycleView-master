@@ -1,6 +1,7 @@
 package com.mlr.demo;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
@@ -61,7 +62,7 @@ public class CommonGridActivity extends BaseActivity {
     }
 
     private View createHeadView(String headerText) {
-        View inflate = inflate(R.layout.common_list_item);
+        View inflate = LayoutInflater.from(this).inflate(R.layout.common_list_item, null, false);
         TextView textView = (TextView) inflate.findViewById(R.id.tweetText);
         textView.setText(headerText);
         return inflate;

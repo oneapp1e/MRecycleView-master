@@ -1,6 +1,7 @@
 package com.mlr.demo;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
@@ -58,13 +59,13 @@ public class PullToRefreshListActivity extends BaseActivity {
 
         rvCommonList.setAdapter(commonListAdapter);
 
-        PullToRefreshRecyclerViewWrapper pullToRefresh = new PullToRefreshRecyclerViewWrapper(this, rvCommonList);
+        final PullToRefreshRecyclerViewWrapper pullToRefresh = new PullToRefreshRecyclerViewWrapper(this, rvCommonList);
         pullToRefresh.setPullToRefreshMode(PullToRefreshRecyclerViewWrapper.Mode.BOTH);
         pullToRefresh.setOnRefreshListener(new PullToRefreshRecyclerViewWrapper.OnRefreshListener() {
             @Override
             public void onRefresh(final PullToRefreshRecyclerViewWrapper refreshView) {
                 LogUtils.e("testbbs setOnRefreshListener  onRefresh");
-                postDelayed(new Runnable() {
+                pullToRefresh.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         refreshView.onRefreshComplete(true);
@@ -77,7 +78,7 @@ public class PullToRefreshListActivity extends BaseActivity {
     }
 
     private View createHeadView(String headerText) {
-        View inflate = inflate(R.layout.common_list_item);
+        View inflate = LayoutInflater.from(this).inflate(R.layout.common_list_item, null, false);
         TextView textView = (TextView) inflate.findViewById(R.id.tweetText);
         textView.setText(headerText);
         return inflate;

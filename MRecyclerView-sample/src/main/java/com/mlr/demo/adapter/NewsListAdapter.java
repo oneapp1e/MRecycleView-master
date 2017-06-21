@@ -33,11 +33,11 @@ public class NewsListAdapter extends MRecyclerViewAdapter {
     @Override
     protected BaseHolder createItemHolder(ViewGroup parent, int viewType) {
         if (viewType == VIEW_TYPE_COMMON_ITEM) {
-            View view = getActivity().inflate(R.layout.item_news, parent, false);
-            return new ItemViewHolder(view, getActivity());
+            View view = getInflater().inflate(R.layout.item_news, parent, false);
+            return new ItemViewHolder(view, getContext());
         } else {
-            View view = getActivity().inflate(R.layout.item_news_photo, parent, false);
-            return new PhotoViewHolder(view, getActivity());
+            View view = getInflater().inflate(R.layout.item_news_photo, parent, false);
+            return new PhotoViewHolder(view, getContext());
         }
     }
 

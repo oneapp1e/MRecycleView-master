@@ -57,8 +57,8 @@ public class DragMoveListAdapter extends MRecyclerViewAdapter<AppInfo, AppInfoHo
     // ==========================================================================
     @Override
     protected AppInfoHolder createItemHolder(ViewGroup parent, int viewType) {
-        View textView = getActivity().inflate(R.layout.common_list_item, parent, false);
-        return new AppInfoHolder(textView, getActivity());
+        View textView = getInflater().inflate(R.layout.common_list_item, parent, false);
+        return new AppInfoHolder(textView, getContext());
     }
 
     @Override
@@ -68,7 +68,7 @@ public class DragMoveListAdapter extends MRecyclerViewAdapter<AppInfo, AppInfoHo
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(), getData().get(position) + "  position:" + position, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), getData().get(position) + "  position:" + position, Toast.LENGTH_SHORT).show();
             }
         });
     }

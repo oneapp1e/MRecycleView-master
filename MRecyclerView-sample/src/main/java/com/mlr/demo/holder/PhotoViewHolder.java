@@ -1,5 +1,6 @@
 package com.mlr.demo.holder;
 
+import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -12,7 +13,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.mlr.demo.R;
 import com.mlr.holder.BaseHolder;
 import com.mlr.mvp.entity.NewsSummary;
-import com.mlr.utils.BaseActivity;
+import com.mlr.utils.ResourceUtils;
 
 import java.util.List;
 
@@ -21,15 +22,15 @@ import java.util.List;
  */
 public class PhotoViewHolder extends BaseHolder<NewsSummary> {
 
-    TextView mNewsSummaryTitleTv;
-    LinearLayout mNewsSummaryPhotoIvGroup;
-    ImageView mNewsSummaryPhotoIvLeft;
-    ImageView mNewsSummaryPhotoIvMiddle;
-    ImageView mNewsSummaryPhotoIvRight;
-    TextView mNewsSummaryPtimeTv;
+    private TextView mNewsSummaryTitleTv;
+    private LinearLayout mNewsSummaryPhotoIvGroup;
+    private ImageView mNewsSummaryPhotoIvLeft;
+    private ImageView mNewsSummaryPhotoIvMiddle;
+    private ImageView mNewsSummaryPhotoIvRight;
+    private TextView mNewsSummaryPtimeTv;
 
-    public PhotoViewHolder(View itemView, BaseActivity activity) {
-        super(itemView, activity);
+    public PhotoViewHolder(View itemView, Context context) {
+        super(itemView, context);
         mNewsSummaryTitleTv = (TextView) itemView.findViewById(R.id.news_summary_title_tv);
         mNewsSummaryPhotoIvGroup = (LinearLayout) itemView.findViewById(R.id.news_summary_photo_iv_group);
         mNewsSummaryPhotoIvLeft = (ImageView) itemView.findViewById(R.id.news_summary_photo_iv_left);
@@ -48,9 +49,9 @@ public class PhotoViewHolder extends BaseHolder<NewsSummary> {
         mNewsSummaryTitleTv.setText(title);
         mNewsSummaryPtimeTv.setText(ptime);
 
-        int PhotoThreeHeight = getActivity().dip2px(90);
-        int PhotoTwoHeight = getActivity().dip2px(120);
-        int PhotoOneHeight = getActivity().dip2px(150);
+        int PhotoThreeHeight = ResourceUtils.dip2px(getContext(),90);
+        int PhotoTwoHeight = ResourceUtils.dip2px(getContext(),120);
+        int PhotoOneHeight = ResourceUtils.dip2px(getContext(),150);
 
         String imgSrcLeft = null;
         String imgSrcMiddle = null;
@@ -68,7 +69,7 @@ public class PhotoViewHolder extends BaseHolder<NewsSummary> {
 
                 layoutParams.height = PhotoThreeHeight;
 
-                mNewsSummaryTitleTv.setText(getActivity()
+                mNewsSummaryTitleTv.setText(getContext()
                         .getString(R.string.photo_collections, adsBeanList.get(0).getTitle()));
             } else if (size >= 2) {
                 imgSrcLeft = adsBeanList.get(0).getImgsrc();
@@ -131,7 +132,7 @@ public class PhotoViewHolder extends BaseHolder<NewsSummary> {
 
     private void showAndSetPhoto(ImageView imageView, String imgSrc) {
         imageView.setVisibility(View.VISIBLE);
-        Glide.with(getActivity()).load(imgSrc).asBitmap()
+        Glide.with(getContext()).load(imgSrc).asBitmap()
                 .format(DecodeFormat.PREFER_ARGB_8888)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .placeholder(R.color.image_place_holder)

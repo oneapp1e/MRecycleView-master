@@ -3,9 +3,9 @@ package com.mlr.demo;
 import android.os.Bundle;
 import android.view.View;
 
+import com.mlr.demo.adapter.NewsListAdapter;
 import com.mlr.mrecyclerview.MRecyclerView;
 import com.mlr.mvp.View.NewsListView;
-import com.mlr.demo.adapter.NewsListAdapter;
 import com.mlr.mvp.entity.NewsSummary;
 import com.mlr.mvp.presenter.NewsListPresenter;
 import com.mlr.mvp.presenter.impl.NewsListPresenterImpl;
@@ -36,7 +36,7 @@ public class Retrofit2Activity extends BaseActivity implements NewsListView {
 
         MRecyclerView mRecyclerView = (MRecyclerView) findViewById(R.id.rv_common_list);
 
-        mRecyclerViewAdapter = new NewsListAdapter(getActivity(), null);
+        mRecyclerViewAdapter = new NewsListAdapter(this, null);
         mRecyclerViewAdapter.setLoadMoreListener(new LoadMoreListener<NewsSummary>() {
             @Override
             public int onLoadMoreRequested(List<NewsSummary> out, int startPosition, int requestSize) {

@@ -1,5 +1,6 @@
 package com.mlr.demo.holder;
 
+import android.content.Context;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -10,7 +11,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.mlr.demo.R;
 import com.mlr.holder.BaseHolder;
 import com.mlr.mvp.entity.NewsSummary;
-import com.mlr.utils.BaseActivity;
 
 /**
  * Created by mulinrui on 12/21 0021.
@@ -22,8 +22,8 @@ public class ItemViewHolder extends BaseHolder<NewsSummary> {
     TextView mNewsSummaryDigestTv;
     TextView mNewsSummaryPtimeTv;
 
-    public ItemViewHolder(View itemView, BaseActivity activity) {
-        super(itemView, activity);
+    public ItemViewHolder(View itemView, Context context) {
+        super(itemView, context);
         mNewsSummaryPhotoIv = (ImageView) itemView.findViewById(R.id.news_summary_photo_iv);
         mNewsSummaryTitleTv = (TextView) itemView.findViewById(R.id.news_summary_title_tv);
         mNewsSummaryDigestTv = (TextView) itemView.findViewById(R.id.news_summary_digest_tv);
@@ -45,7 +45,7 @@ public class ItemViewHolder extends BaseHolder<NewsSummary> {
         mNewsSummaryPtimeTv.setText(ptime);
         mNewsSummaryDigestTv.setText(digest);
 
-        Glide.with(getActivity()).load(imgSrc).asBitmap() // gif格式有时会导致整体图片不显示，貌似有冲突
+        Glide.with(getContext()).load(imgSrc).asBitmap() // gif格式有时会导致整体图片不显示，貌似有冲突
                 .format(DecodeFormat.PREFER_ARGB_8888)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .placeholder(R.color.image_place_holder)

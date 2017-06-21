@@ -1,12 +1,12 @@
 package com.mlr.demo.holder;
 
+import android.content.Context;
 import android.view.View;
 import android.widget.TextView;
 
 import com.mlr.demo.R;
 import com.mlr.demo.model.AppInfo;
 import com.mlr.holder.BaseHolder;
-import com.mlr.utils.BaseActivity;
 
 /**
  * Created by mulinrui on 2016/11/16.
@@ -18,8 +18,8 @@ public class AppInfoHolder extends BaseHolder<AppInfo> {
     // ==========================================================================
     // Constants
     // ==========================================================================
-    public AppInfoHolder(View itemView, BaseActivity activity) {
-        super(itemView, activity);
+    public AppInfoHolder(View itemView, Context context) {
+        super(itemView, context);
         mTextView = (TextView) itemView.findViewById(R.id.tweetText);
     }
 

@@ -66,11 +66,11 @@ public class MixListGridAdapter extends MRecyclerViewAdapter<ViewTypeInfo, BaseH
     // ==========================================================================
     @Override
     protected BaseHolder createItemHolder(ViewGroup parent, int viewType) {
-        View textView = getActivity().inflate(R.layout.common_list_item, parent, false);
+        View textView = getInflater().inflate(R.layout.common_list_item, parent, false);
         if (viewType == DataServer.VIEW_TYPE_LIST) {
-            return new AppInfoHolder(textView, getActivity());
+            return new AppInfoHolder(textView, getContext());
         } else {
-            return new TitleInfoHolder(textView, getActivity());
+            return new TitleInfoHolder(textView, getContext());
         }
     }
 
@@ -82,7 +82,7 @@ public class MixListGridAdapter extends MRecyclerViewAdapter<ViewTypeInfo, BaseH
             ((AppInfoHolder) holder).itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(getActivity(), getData().get(position) + "  position:" + position, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getData().get(position) + "  position:" + position, Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
@@ -90,7 +90,7 @@ public class MixListGridAdapter extends MRecyclerViewAdapter<ViewTypeInfo, BaseH
             ((TitleInfoHolder) holder).itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(getActivity(), getData().get(position) + "  position:" + position, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getData().get(position) + "  position:" + position, Toast.LENGTH_SHORT).show();
                 }
             });
         }
