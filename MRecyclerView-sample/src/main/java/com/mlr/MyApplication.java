@@ -15,10 +15,10 @@ public class MyApplication extends Application {
 
     private static Context sAppContext;
 
+
     @Override
-    public void onCreate() {
-        super.onCreate();
-        sAppContext = this;
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
 
         SophixManager.getInstance()
                 .setContext(this)
@@ -32,23 +32,31 @@ public class MyApplication extends Application {
                         if (code == PatchStatus.CODE_LOAD_SUCCESS) {
                             // 表明补丁加载成功
 //                            LogUtils.e("mlr 补丁加载成功");
+                            System.out.println("mlr 补丁加载成功");
                         } else if (code == PatchStatus.CODE_LOAD_RELAUNCH) {
                             // 表明新补丁生效需要重启. 开发者可提示用户或者强制重启;
                             // 建议: 用户可以监听进入后台事件, 然后应用自杀
 //                            LogUtils.e("mlr 新补丁生效需要重启");
-//                            SophixManager.getInstance().killProcessSafely();
+                            System.out.println("mlr 新补丁生效需要重启");
+                            SophixManager.getInstance().killProcessSafely();
                         } else if (code == PatchStatus.CODE_LOAD_FAIL) {
 //                            LogUtils.e("mlr 内部引擎异常");
+                            System.out.println("mlr 内部引擎异常");
                             // 内部引擎异常, 推荐此时清空本地补丁, 防止失败补丁重复加载
 //                            SophixManager.getInstance().cleanPatches();
                         } else {
                             // 其它错误信息, 查看PatchStatus类说明
 //                            LogUtils.e("mlr 其它错误信息" + code);
+                            System.out.println("mlr 其它错误信息" + code);
                         }
                     }
                 }).initialize();
+    }
 
-
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        sAppContext = this;
     }
 
     public static Context getAppContext() {
