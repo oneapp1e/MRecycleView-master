@@ -34,14 +34,7 @@ android {
             minifyEnabled false     //是否混淆
         }
     }
-    productFlavors {
-        devold {
 
-        }
-        devnew {
-
-        }
-    }
 }
 
 dependencies {
@@ -56,4 +49,7 @@ dependencies {
     compile 'com.aliyun.ams:alicloud-android-hotfix:3.0.2'
 //    compile project(':MRecyclerView')
     compile 'com.mlr:androidutils:1.1.0'
+    compile ('com.airbnb.android:lottie:2.2.3') {
+        exclude module: 'appcompat-v7'
+    }
 }

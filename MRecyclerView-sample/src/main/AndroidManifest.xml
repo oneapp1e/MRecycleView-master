@@ -16,13 +16,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
     >
-        <activity android:name="com.mlr.demo.MainActivity">
+        <activity android:name="com.mlr.demo.SplashActivity"
+        >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <activity android:name="com.mlr.demo.MainActivity"
+                  android:launchMode="singleTask"
+        />
+
         <activity android:name="com.mlr.demo.CommonListActivity"/>
         <activity android:name="com.mlr.demo.HorizontalCommonListActivity"/>
         <activity android:name="com.mlr.demo.CommonGridActivity"/>
