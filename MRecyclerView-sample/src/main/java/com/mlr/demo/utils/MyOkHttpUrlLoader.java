@@ -28,7 +28,7 @@ public class MyOkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
     @Nullable
     @Override
     public LoadData<InputStream> buildLoadData(GlideUrl glideUrl, int width, int height, Options options) {
-        return new LoadData(glideUrl, new MyOkHttpStreamFetcher(client, glideUrl));
+        return new LoadData<>(glideUrl, new MyOkHttpStreamFetcher(client, glideUrl));
     }
 
     @Override

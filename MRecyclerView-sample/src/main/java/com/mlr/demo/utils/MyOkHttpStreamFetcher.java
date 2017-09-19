@@ -1,6 +1,7 @@
 package com.mlr.demo.utils;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -8,6 +9,7 @@ import com.bumptech.glide.load.HttpException;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.util.ContentLengthInputStream;
+import com.bumptech.glide.util.Synthetic;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,13 +24,17 @@ import okhttp3.ResponseBody;
  * Created by mulinrui on 9/19 0019.
  */
 
-public class MyOkHttpStreamFetcher implements DataFetcher<InputStream> {
+public class MyOkHttpStreamFetcher implements DataFetcher<InputStream>, okhttp3.Callback {
 
+    private static final String TAG = "OkHttpFetcher";
     private final Call.Factory client;
     private final GlideUrl url;
-    private InputStream stream;
-    private ResponseBody responseBody;
+    @Synthetic
+    InputStream stream;
+    @Synthetic
+    ResponseBody responseBody;
     private volatile Call call;
+    private DataCallback<? super InputStream> callback;
 
     public MyOkHttpStreamFetcher(Call.Factory client, GlideUrl url) {
         this.client = client;
@@ -36,33 +42,48 @@ public class MyOkHttpStreamFetcher implements DataFetcher<InputStream> {
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super InputStream> callback) {
+    public void loadData(Priority priority, final DataCallback<? super InputStream> callback) {
         Request.Builder requestBuilder = new Request.Builder().url(url.toStringUrl());
-
         for (Map.Entry<String, String> headerEntry : url.getHeaders().entrySet()) {
             String key = headerEntry.getKey();
             requestBuilder.addHeader(key, headerEntry.getValue());
         }
         Request request = requestBuilder.build();
+        this.callback = callback;
 
-        Response response;
         call = client.newCall(request);
         try {
-            response = call.execute();
+            // Calling execute instead of enqueue is a workaround for #2355, where okhttp throws a
+            // ClassCastException on O.
+            onResponse(call, call.execute());
+        } catch (IOException e) {
+            onFailure(call, e);
+        } catch (ClassCastException e) {
+            // It's not clear that this catch is necessary, the error may only occur even on O if
+            // enqueue is used.
+            onFailure(call, new IOException("Workaround for framework bug on O", e));
+        }
+    }
 
-            responseBody = response.body();
-            if (!response.isSuccessful()) {
-                callback.onLoadFailed(new HttpException(response.message(), response.code()));
-            }
+    @Override
+    public void onFailure(Call call, IOException e) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "OkHttp failed to obtain result", e);
+        }
 
+        callback.onLoadFailed(e);
+    }
+
+    @Override
+    public void onResponse(Call call, Response response) throws IOException {
+        responseBody = response.body();
+        if (response.isSuccessful()) {
             long contentLength = responseBody.contentLength();
             stream = ContentLengthInputStream.obtain(responseBody.byteStream(), contentLength);
             callback.onDataReady(stream);
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        } else {
+            callback.onLoadFailed(new HttpException(response.message(), response.code()));
         }
-
     }
 
     @Override
@@ -77,6 +98,7 @@ public class MyOkHttpStreamFetcher implements DataFetcher<InputStream> {
         if (responseBody != null) {
             responseBody.close();
         }
+        callback = null;
     }
 
     @Override
