@@ -5,10 +5,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DecodeFormat;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.mlr.demo.R;
+import com.mlr.demo.utils.GlideApp;
 import com.mlr.holder.BaseHolder;
 import com.mlr.mvp.entity.NewsSummary;
 
@@ -45,11 +43,7 @@ public class ItemViewHolder extends BaseHolder<NewsSummary> {
         mNewsSummaryPtimeTv.setText(ptime);
         mNewsSummaryDigestTv.setText(digest);
 
-        Glide.with(getContext()).load(imgSrc).asBitmap() // gif格式有时会导致整体图片不显示，貌似有冲突
-                .format(DecodeFormat.PREFER_ARGB_8888)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .placeholder(R.color.image_place_holder)
-                .error(R.drawable.ic_load_fail)
-                .into(mNewsSummaryPhotoIv);
+
+        GlideApp.with(getContext()).load(imgSrc).into(mNewsSummaryPhotoIv);
     }
 }

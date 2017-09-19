@@ -7,10 +7,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DecodeFormat;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.mlr.demo.R;
+import com.mlr.demo.utils.GlideApp;
 import com.mlr.holder.BaseHolder;
 import com.mlr.mvp.entity.NewsSummary;
 import com.mlr.utils.ResourceUtils;
@@ -49,9 +47,9 @@ public class PhotoViewHolder extends BaseHolder<NewsSummary> {
         mNewsSummaryTitleTv.setText(title);
         mNewsSummaryPtimeTv.setText(ptime);
 
-        int PhotoThreeHeight = ResourceUtils.dip2px(getContext(),90);
-        int PhotoTwoHeight = ResourceUtils.dip2px(getContext(),120);
-        int PhotoOneHeight = ResourceUtils.dip2px(getContext(),150);
+        int PhotoThreeHeight = ResourceUtils.dip2px(getContext(), 90);
+        int PhotoTwoHeight = ResourceUtils.dip2px(getContext(), 120);
+        int PhotoOneHeight = ResourceUtils.dip2px(getContext(), 150);
 
         String imgSrcLeft = null;
         String imgSrcMiddle = null;
@@ -132,12 +130,9 @@ public class PhotoViewHolder extends BaseHolder<NewsSummary> {
 
     private void showAndSetPhoto(ImageView imageView, String imgSrc) {
         imageView.setVisibility(View.VISIBLE);
-        Glide.with(getContext()).load(imgSrc).asBitmap()
-                .format(DecodeFormat.PREFER_ARGB_8888)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .placeholder(R.color.image_place_holder)
-                .error(R.drawable.ic_load_fail)
-                .into(imageView);
+
+
+        GlideApp.with(getContext()).load(imgSrc).into(imageView);
     }
 
     private void hidePhoto(ImageView imageView) {
