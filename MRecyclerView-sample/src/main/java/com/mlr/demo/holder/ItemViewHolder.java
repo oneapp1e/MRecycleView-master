@@ -31,13 +31,13 @@ public class ItemViewHolder extends BaseHolder<NewsSummary> {
     @Override
     public void setData(NewsSummary newsSummary) {
         super.setData(newsSummary);
-        String title = newsSummary.getLtitle();
+        String title = newsSummary.getTitle();
         if (title == null) {
             title = newsSummary.getTitle();
         }
-        String ptime = newsSummary.getPtime();
-        String digest = newsSummary.getDigest();
-        String imgSrc = newsSummary.getImgsrc();
+        String ptime = newsSummary.getDate();
+        String digest = newsSummary.getAuthor_name();
+        String imgSrc = newsSummary.getThumbnail_pic_s();
 
         mNewsSummaryTitleTv.setText(title);
         mNewsSummaryPtimeTv.setText(ptime);

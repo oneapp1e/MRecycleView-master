@@ -12,8 +12,7 @@ import com.mlr.demo.utils.GlideApp;
 import com.mlr.holder.BaseHolder;
 import com.mlr.mvp.entity.NewsSummary;
 import com.mlr.utils.ResourceUtils;
-
-import java.util.List;
+import com.mlr.utils.StringUtils;
 
 /**
  * Created by mulinrui on 12/21 0021.
@@ -42,7 +41,7 @@ public class PhotoViewHolder extends BaseHolder<NewsSummary> {
     public void setData(NewsSummary newsSummary) {
         super.setData(newsSummary);
         String title = newsSummary.getTitle();
-        String ptime = newsSummary.getPtime();
+        String ptime = newsSummary.getDate();
 
         mNewsSummaryTitleTv.setText(title);
         mNewsSummaryPtimeTv.setText(ptime);
@@ -57,48 +56,22 @@ public class PhotoViewHolder extends BaseHolder<NewsSummary> {
 
         ViewGroup.LayoutParams layoutParams = mNewsSummaryPhotoIvGroup.getLayoutParams();
 
-        if (newsSummary.getAds() != null) {
-            List<NewsSummary.AdsBean> adsBeanList = newsSummary.getAds();
-            int size = adsBeanList.size();
-            if (size >= 3) {
-                imgSrcLeft = adsBeanList.get(0).getImgsrc();
-                imgSrcMiddle = adsBeanList.get(1).getImgsrc();
-                imgSrcRight = adsBeanList.get(2).getImgsrc();
+        if (!StringUtils.isEmpty(newsSummary.getThumbnail_pic_s())
+                && !StringUtils.isEmpty(newsSummary.getThumbnail_pic_s02())
+                && !StringUtils.isEmpty(newsSummary.getThumbnail_pic_s03())) {
+            imgSrcLeft = newsSummary.getThumbnail_pic_s();
+            imgSrcMiddle = newsSummary.getThumbnail_pic_s02();
+            imgSrcRight = newsSummary.getThumbnail_pic_s03();
 
-                layoutParams.height = PhotoThreeHeight;
+            layoutParams.height = PhotoThreeHeight;
+        } else if (!StringUtils.isEmpty(newsSummary.getThumbnail_pic_s())
+                && !StringUtils.isEmpty(newsSummary.getThumbnail_pic_s02())) {
+            imgSrcLeft = newsSummary.getThumbnail_pic_s();
+            imgSrcMiddle = newsSummary.getThumbnail_pic_s02();
 
-                mNewsSummaryTitleTv.setText(getContext()
-                        .getString(R.string.photo_collections, adsBeanList.get(0).getTitle()));
-            } else if (size >= 2) {
-                imgSrcLeft = adsBeanList.get(0).getImgsrc();
-                imgSrcMiddle = adsBeanList.get(1).getImgsrc();
-
-                layoutParams.height = PhotoTwoHeight;
-            } else if (size >= 1) {
-                imgSrcLeft = adsBeanList.get(0).getImgsrc();
-
-                layoutParams.height = PhotoOneHeight;
-            }
-        } else if (newsSummary.getImgextra() != null) {
-            int size = newsSummary.getImgextra().size();
-            if (size >= 3) {
-                imgSrcLeft = newsSummary.getImgextra().get(0).getImgsrc();
-                imgSrcMiddle = newsSummary.getImgextra().get(1).getImgsrc();
-                imgSrcRight = newsSummary.getImgextra().get(2).getImgsrc();
-
-                layoutParams.height = PhotoThreeHeight;
-            } else if (size >= 2) {
-                imgSrcLeft = newsSummary.getImgextra().get(0).getImgsrc();
-                imgSrcMiddle = newsSummary.getImgextra().get(1).getImgsrc();
-
-                layoutParams.height = PhotoTwoHeight;
-            } else if (size >= 1) {
-                imgSrcLeft = newsSummary.getImgextra().get(0).getImgsrc();
-
-                layoutParams.height = PhotoOneHeight;
-            }
+            layoutParams.height = PhotoTwoHeight;
         } else {
-            imgSrcLeft = newsSummary.getImgsrc();
+            imgSrcLeft = newsSummary.getThumbnail_pic_s();
 
             layoutParams.height = PhotoOneHeight;
         }
@@ -131,8 +104,8 @@ public class PhotoViewHolder extends BaseHolder<NewsSummary> {
     private void showAndSetPhoto(ImageView imageView, String imgSrc) {
         imageView.setVisibility(View.VISIBLE);
 
-
-        GlideApp.with(getContext()).load(imgSrc).into(imageView);
+//        imgSrc = "file:///android_asset/gif01.gif";
+        GlideApp.with(getContext()).asBitmap().load(imgSrc).into(imageView);
     }
 
     private void hidePhoto(ImageView imageView) {

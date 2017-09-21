@@ -1,16 +1,18 @@
 package com.mlr.mvp.retrofit2;
 
+import android.content.Context;
+import android.os.Build;
 import android.support.annotation.NonNull;
+import android.webkit.WebSettings;
 
 import com.mlr.MyApplication;
-import com.mlr.mvp.entity.NewsSummary;
+import com.mlr.mvp.entity.ReasonResult;
+import com.mlr.utils.LogUtil;
 import com.mlr.utils.LogUtils;
 import com.mlr.utils.NetworkUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
@@ -66,7 +68,7 @@ public class RetrofitManager {
     }
 
     private RetrofitManager() {
-        Retrofit retrofit = new Retrofit.Builder().baseUrl("http://c.m.163.com/")
+        Retrofit retrofit = new Retrofit.Builder().baseUrl("http://v.juhe.cn/")
                 .client(getOkHttpClient()).addConverterFactory(GsonConverterFactory.create())
                 .build();
         mNewsService = retrofit.create(NewListService.class);
@@ -111,19 +113,21 @@ public class RetrofitManager {
                     };
 
 
-//                    final Interceptor mLoggingInterceptor = new Interceptor() {
-//                        @Override
-//                        public Response intercept(Chain chain) throws IOException {
-//                            Request request = chain.request();
-//                            long t1 = System.nanoTime();
-//                            LogUtils.i(String.format("testbbs Sending request %s on %s%n%s", request.url(), chain.connection(), request.headers()));
-//                            Response response = chain.proceed(request);
-//                            long t2 = System.nanoTime();
-//                            LogUtils.i(String.format(Locale.getDefault(), "testbbs Received response for %s in %.1fms%n%s",
-//                                    response.request().url(), (t2 - t1) / 1e6d, response.headers()));
-//                            return response;
-//                        }
-//                    };
+                    final Interceptor headerInterceptor = new Interceptor() {
+                        @Override
+                        public Response intercept(Chain chain) throws IOException {
+                            Request request = chain.request();
+                            Response response = chain.proceed(request);
+                            response.newBuilder().removeHeader("User-Agent")
+                                    .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                                    .addHeader("Accept-Encoding", "gzip, deflate")
+                                    .addHeader("Connection", "keep-alive")
+                                    .addHeader("Accept", "*/*")
+                                    .addHeader("User-Agent", getUserAgent(MyApplication.getAppContext()))
+                                    .build();
+                            return response;
+                        }
+                    };
 
                     HttpLoggingInterceptor mHttpLoggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
                         @Override
@@ -134,7 +138,8 @@ public class RetrofitManager {
 
 
                     //设置log日志级别
-                    mHttpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+                    mHttpLoggingInterceptor
+                            .setLevel(HttpLoggingInterceptor.Level.BODY);
 
                     sOkHttpClient = new OkHttpClient.Builder().cache(cache)
                             .connectTimeout(6, TimeUnit.SECONDS)
@@ -143,12 +148,37 @@ public class RetrofitManager {
                             .addInterceptor(mRewriteCacheControlInterceptor)
                             .addNetworkInterceptor(mRewriteCacheControlInterceptor)
                             .addInterceptor(mHttpLoggingInterceptor)
-//                            .addInterceptor(mLoggingInterceptor)
+                            .addInterceptor(headerInterceptor)
                             .build();
                 }
             }
         }
         return sOkHttpClient;
+    }
+
+
+    private static String getUserAgent(Context context) {
+        String userAgent = "";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            try {
+                userAgent = WebSettings.getDefaultUserAgent(context);
+            } catch (Exception e) {
+                userAgent = System.getProperty("http.agent");
+            }
+        } else {
+            userAgent = System.getProperty("http.agent");
+        }
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0, length = userAgent.length(); i < length; i++) {
+            char c = userAgent.charAt(i);
+            if (c <= '\u001f' || c >= '\u007f') {
+                sb.append(String.format("\\u%04x", (int) c));
+            } else {
+                sb.append(c);
+            }
+        }
+        LogUtil.e("mlr getUserAgent:" + sb.toString());
+        return sb.toString();
     }
 
     /**
@@ -160,10 +190,10 @@ public class RetrofitManager {
     }
 
     /**
-     * example：http://c.m.163.com/nc/article/headline/T1348647909107/0-20.html
      */
-    public Call<Map<String, List<NewsSummary>>> getNewsList(String id, int startPage, int pageSize) {
-        return mNewsService.getNewList(getCacheControl(), id, startPage, pageSize);
+    public Call<ReasonResult> getNewsList(String key, int page, int rows) {
+        return mNewsService.getNewList(getCacheControl(), key);
+//        return mNewsService.getNewList(getCacheControl(), key, page, rows);
     }
 
 }
