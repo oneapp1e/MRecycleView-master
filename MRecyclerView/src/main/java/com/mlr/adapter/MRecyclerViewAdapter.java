@@ -134,13 +134,6 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     // Methods
     // ==========================================================================
 
-    @Override
-    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
-        super.onAttachedToRecyclerView(recyclerView);
-        if (recyclerView instanceof MRecyclerView) {
-            this.mRecyclerView = (MRecyclerView) recyclerView;
-        }
-    }
 
     /**
      * 阻塞更多项的加载
@@ -369,10 +362,16 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
     }
 
     @Override
-    public final T createMoreViewHolder(ViewGroup parent, int viewType) {
+    protected final T createMoreViewHolder(ViewGroup parent, int viewType) {
         View v = getInflater().inflate(R.layout.list_load_more, parent, false);
         mBtnRefresh = (TextView) v.findViewById(R.id.btn_refresh);
         mSpinnerBg = (LinearLayout) v.findViewById(R.id.relative_spinner_bg);
+        return (T) new SimpleHolder(v, getContext());
+    }
+
+    @Override
+    protected final T createEndViewHolder(ViewGroup parent, int viewType) {
+        View v = getInflater().inflate(R.layout.list_to_end, parent, false);
         return (T) new SimpleHolder(v, getContext());
     }
 
@@ -388,6 +387,10 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
 
             });
         }
+    }
+
+    @Override
+    protected void bindEndViewHolder(T holder, int position, int viewType) {
 
     }
 

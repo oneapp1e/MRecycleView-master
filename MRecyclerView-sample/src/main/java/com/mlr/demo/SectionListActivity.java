@@ -24,7 +24,7 @@ public class SectionListActivity extends BaseActivity {
 
         SectionListAdapter sectionListAdapter = new SectionListAdapter(this, DataServer.getSectionData(5), rvCommonList);
         //启动到底了试图
-        sectionListAdapter.setToEndEnabled(true, rvCommonList);
+        sectionListAdapter.setToEndEnabled(true);
 
         //加载更多数据
         sectionListAdapter.setLoadMoreListener(new LoadMoreListener() {

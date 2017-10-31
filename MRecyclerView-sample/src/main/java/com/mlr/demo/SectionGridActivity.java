@@ -24,7 +24,7 @@ public class SectionGridActivity extends BaseActivity {
 
         SectionGridAdapter sectionGridAdapter = new SectionGridAdapter(this, DataServer.getSectionData(5), rvCommonList);
         //启动到底了试图
-        sectionGridAdapter.setToEndEnabled(true, rvCommonList);
+        sectionGridAdapter.setToEndEnabled(true);
 
         //加载更多数据
         sectionGridAdapter.setLoadMoreListener(new LoadMoreListener() {

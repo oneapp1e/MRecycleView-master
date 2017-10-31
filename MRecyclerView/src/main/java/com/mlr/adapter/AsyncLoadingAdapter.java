@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import com.mlr.holder.BaseHolder;
 import com.mlr.holder.SimpleHolder;
 import com.mlr.mrecyclerview.MRecyclerView;
-import com.mlr.mrecyclerview.R;
 import com.mlr.utils.LogUtil;
 
 
@@ -117,6 +116,7 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
 
     /**
      * inflater
+     *
      * @return
      */
     protected LayoutInflater getInflater() {
@@ -141,12 +141,18 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
      * 开启到底了试图 必须传入列表view
      * {@link #mToEndEnabled},{@link #mRecyclerView}
      *
-     * @param enabled      enabled
-     * @param recyclerView recyclerView
+     * @param enabled enabled
      */
-    public void setToEndEnabled(boolean enabled, MRecyclerView recyclerView) {
+    public void setToEndEnabled(boolean enabled) {
         mToEndEnabled = enabled;
-        mRecyclerView = recyclerView;
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        if (recyclerView instanceof MRecyclerView) {
+            this.mRecyclerView = (MRecyclerView) recyclerView;
+        }
     }
 
     /**
@@ -226,7 +232,7 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
     /**
      * 获取“更多”项的视图
      */
-    public abstract T createMoreViewHolder(ViewGroup parent, int viewType);
+    protected abstract T createMoreViewHolder(ViewGroup parent, int viewType);
 
     /**
      * 获取底部到底了视图
@@ -235,10 +241,7 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
      * @param viewType viewType
      * @return ViewHolder
      */
-    private T createEndViewHolder(ViewGroup parent, int viewType) {
-        View v = getInflater().inflate(R.layout.list_to_end, parent, false);
-        return (T) new SimpleHolder(v, getContext());
-    }
+    protected abstract T createEndViewHolder(ViewGroup parent, int viewType);
 
     /**
      * 如果返回false，异步的loadMore线程将发生阻塞，直到返回true或者超时。
@@ -366,7 +369,8 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
     @Override
     public final int getItemCount() {
         final int itemCount = getCount();
-        if (mMoreEnabled && hasMore() && (itemCount < getItemLimit())) {
+        if ((itemCount > getPreloadCount()) && (itemCount < getItemLimit()) && hasMore()
+                && mMoreEnabled) {
             return itemCount + 1;
         } else if (mToEndEnabled && mCanScrollUp && !hasMore()) {
             return itemCount + 1;
@@ -377,10 +381,12 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
 
     @Override
     public final int getItemViewType(int position) {
-        if (position < getCount()) {
+        final int itemCount = getCount();
+        if (position < itemCount) {
             return getContentItemViewType(position);
         }
-        if (hasMore() && mMoreEnabled) {
+        if ((itemCount > getPreloadCount()) && (itemCount < getItemLimit()) && hasMore()
+                && mMoreEnabled) {
             return VIEW_TYPE_MORE;
         }
         return VIEW_TYPE_END;
@@ -432,8 +438,7 @@ public abstract class AsyncLoadingAdapter<T extends BaseHolder> extends Recycler
 
     protected abstract void bindMoreViewHolder(T holder, int position, int viewType);
 
-    private void bindEndViewHolder(T holder, int position, int viewType) {
-    }
+    protected abstract void bindEndViewHolder(T holder, int position, int viewType);
 
     // ==========================================================================
     // Inner/Nested Classes

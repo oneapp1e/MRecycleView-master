@@ -24,7 +24,7 @@ public class HorizontalCommonListActivity extends BaseActivity {
 
         CommonListAdapter commonListAdapter = new CommonListAdapter(this,  DataServer.getCommonData(20));
         //启动到底了试图
-        commonListAdapter.setToEndEnabled(true, rvCommonList);
+        commonListAdapter.setToEndEnabled(true);
 
         //加载更多数据
         commonListAdapter.setLoadMoreListener(new LoadMoreListener() {

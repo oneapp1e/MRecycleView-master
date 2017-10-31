@@ -12,7 +12,7 @@ android {
         }
     }
     compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.mlr.demo"
         minSdkVersion 14
@@ -39,7 +39,7 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.mlr:MRecyclerView:1.2.0'
+
     compile 'com.android.support:cardview-v7:25.3.0'
     compile 'com.jaredrummler:material-spinner:1.1.0'
     //网络请求
@@ -52,7 +52,8 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.1.1'
     //阿里热修复
     compile 'com.aliyun.ams:alicloud-android-hotfix:3.0.2'
-//    compile project(':MRecyclerView')
+    compile project(':MRecyclerView')
+//    compile 'com.mlr:MRecyclerView:1.2.0'
 
     compile 'com.mlr:androidutils:1.1.0'
     //闪屏动画

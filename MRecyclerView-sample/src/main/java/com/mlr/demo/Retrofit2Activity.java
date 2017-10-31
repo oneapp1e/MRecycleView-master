@@ -45,7 +45,7 @@ public class Retrofit2Activity extends BaseActivity implements NewsListView {
         });
         mRecyclerView.setAdapter(mRecyclerViewAdapter);
         //启动到底了试图
-        mRecyclerViewAdapter.setToEndEnabled(true, mRecyclerView);
+        mRecyclerViewAdapter.setToEndEnabled(true);
         showProgress();
         mNewsListPresenter.refreshData();
     }

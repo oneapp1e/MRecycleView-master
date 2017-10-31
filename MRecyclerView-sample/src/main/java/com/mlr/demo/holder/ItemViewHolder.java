@@ -5,8 +5,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.mlr.demo.R;
-import com.mlr.demo.utils.GlideApp;
 import com.mlr.holder.BaseHolder;
 import com.mlr.mvp.entity.NewsSummary;
 
@@ -44,6 +44,6 @@ public class ItemViewHolder extends BaseHolder<NewsSummary> {
         mNewsSummaryDigestTv.setText(digest);
 
 
-        GlideApp.with(getContext()).load(imgSrc).into(mNewsSummaryPhotoIv);
+        Glide.with(getContext()).load(imgSrc).into(mNewsSummaryPhotoIv);
     }
 }

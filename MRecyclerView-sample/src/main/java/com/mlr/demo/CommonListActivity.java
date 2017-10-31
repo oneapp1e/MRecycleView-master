@@ -29,7 +29,7 @@ public class CommonListActivity extends BaseActivity {
 
         CommonListAdapter commonListAdapter = new CommonListAdapter(this, DataServer.getCommonData(20));
         //启动到底了试图
-        commonListAdapter.setToEndEnabled(true, rvCommonList);
+        commonListAdapter.setToEndEnabled(true);
         //添加headerView
         View headerView1 = createHeadView("headerView1");
         commonListAdapter.addHeaderView(headerView1);
