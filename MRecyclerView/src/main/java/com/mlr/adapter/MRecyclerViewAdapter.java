@@ -249,7 +249,6 @@ public abstract class MRecyclerViewAdapter<Data extends ViewTypeInfo, T extends 
 
     /**
      * 获取item的viewType
-     * 子类重写该方法
      * 此处已经减去headerView数量  子类不需要处理
      *
      * @param position 已经减去headerView数量的索引

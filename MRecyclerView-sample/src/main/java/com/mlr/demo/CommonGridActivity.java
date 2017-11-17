@@ -23,9 +23,9 @@ public class CommonGridActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_common_list);
 
-        MRecyclerView rvCommonList = (MRecyclerView) findViewById(R.id.rv_common_list);
+        final MRecyclerView rvCommonList = (MRecyclerView) findViewById(R.id.rv_common_list);
 
-        CommonGridAdapter commonListAdapter = new CommonGridAdapter(this, DataServer.getCommonData(20));
+        final CommonGridAdapter commonListAdapter = new CommonGridAdapter(this, DataServer.getCommonData(20));
         //启动到底了试图
         commonListAdapter.setToEndEnabled(true);
         //添加headerView
@@ -33,14 +33,6 @@ public class CommonGridActivity extends BaseActivity {
         commonListAdapter.addHeaderView(headerView1);
         View headerView2 = createHeadView("headerView2");
         commonListAdapter.addHeaderView(headerView2);
-        View headerView0 = createHeadView("headerView0");
-        commonListAdapter.addFirstHeaderView(headerView0);
-        View headerView3 = createHeadView("headerView3");
-        commonListAdapter.addHeaderView(headerView3, 4);
-        View headerView4 = createHeadView("headerView4");
-        commonListAdapter.addHeaderView(headerView4, 4);
-        commonListAdapter.removeHeaderView(headerView2);
-        commonListAdapter.removeHeaderView(headerView1);
 
         //加载更多数据
         commonListAdapter.setLoadMoreListener(new LoadMoreListener() {
@@ -58,7 +50,14 @@ public class CommonGridActivity extends BaseActivity {
         });
         rvCommonList.setAdapter(commonListAdapter);
 
-        rvCommonList.setAdapter(commonListAdapter);
+        rvCommonList.showShimmerAdapter();
+        rvCommonList.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                commonListAdapter.setData(DataServer.getCommonData(20));
+                rvCommonList.hideShimmerAdapter();
+            }
+        }, 30000);
     }
 
     private View createHeadView(String headerText) {

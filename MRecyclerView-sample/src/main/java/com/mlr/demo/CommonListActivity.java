@@ -24,10 +24,10 @@ public class CommonListActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_common_list);
 
-        MRecyclerView rvCommonList = (MRecyclerView) findViewById(R.id.rv_common_list);
+        final MRecyclerView rvCommonList = (MRecyclerView) findViewById(R.id.rv_common_list);
 
 
-        CommonListAdapter commonListAdapter = new CommonListAdapter(this, DataServer.getCommonData(20));
+        final CommonListAdapter commonListAdapter = new CommonListAdapter(this, null);
         //启动到底了试图
         commonListAdapter.setToEndEnabled(true);
         //添加headerView
@@ -59,6 +59,15 @@ public class CommonListActivity extends BaseActivity {
             }
         });
         rvCommonList.setAdapter(commonListAdapter);
+
+        rvCommonList.showShimmerAdapter();
+        rvCommonList.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                commonListAdapter.setData(DataServer.getCommonData(20));
+                rvCommonList.hideShimmerAdapter();
+            }
+        }, 30000);
 
     }
 

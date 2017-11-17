@@ -3,6 +3,8 @@ package com.mlr.mrecyclerview;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -11,6 +13,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import com.mlr.adapter.MRecyclerViewAdapter;
+import com.mlr.adapter.ShimmerAdapter;
 import com.mlr.utils.DragAndMoveItemTouchHelperCallback;
 import com.mlr.utils.ISpanSizeLookup;
 import com.mlr.utils.LogUtil;
@@ -46,6 +49,11 @@ public class MRecyclerView extends RecyclerView {
      */
     private int mSpanCount;
 
+    private Adapter mActualAdapter;
+    private ShimmerAdapter mShimmerAdapter;
+    private int mLayoutReference = R.layout.layout_sample_view;
+    private boolean mCanScroll = true;
+
     // ==========================================================================
     // Constructors
     // ==========================================================================
@@ -58,12 +66,41 @@ public class MRecyclerView extends RecyclerView {
         super(context, attrs);
         //设置默认值
         mOrientation = VERTICAL;
+
+        mShimmerAdapter = new ShimmerAdapter(context, mSpanCount);
+
+        int mShimmerAngle;
+        int mShimmerColor;
+        int mShimmerDuration;
+        Drawable mShimmerItemBackground;
+
         if (attrs != null) {
             TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MRecyclerView);
-            mOrientation = a.getInteger(R.styleable.MRecyclerView_orientation, VERTICAL);
-            a.recycle();
+
+            try {
+                mOrientation = a.getInteger(R.styleable.MRecyclerView_orientation, VERTICAL);
+
+                if (a.hasValue(R.styleable.MRecyclerView_shimmer_demo_layout)) {
+                    setDemoLayoutReference(a.getResourceId(R.styleable.MRecyclerView_shimmer_demo_layout, R.layout.layout_sample_view));
+                }
+
+                mShimmerAngle = a.getInteger(R.styleable.MRecyclerView_shimmer_demo_angle, 0);
+                mShimmerColor = a.getColor(R.styleable.MRecyclerView_shimmer_demo_shimmer_color, getColor(R.color.default_shimmer_color));
+                mShimmerItemBackground = a.getDrawable(R.styleable.MRecyclerView_shimmer_demo_view_holder_item_background);
+                mShimmerDuration = a.getInteger(R.styleable.MRecyclerView_shimmer_demo_duration, 1500);
+            } finally {
+                a.recycle();
+            }
+
+            mShimmerAdapter.setShimmerAngle(mShimmerAngle);
+            mShimmerAdapter.setShimmerColor(mShimmerColor);
+            mShimmerAdapter.setShimmerItemBackground(mShimmerItemBackground);
+            mShimmerAdapter.setShimmerDuration(mShimmerDuration);
         }
+
+
         initRecyclerView();
+
     }
 
     // ==========================================================================
@@ -107,6 +144,13 @@ public class MRecyclerView extends RecyclerView {
 
     @Override
     public void setAdapter(Adapter adapter) {
+
+        if (adapter == null) {
+            mActualAdapter = null;
+        } else if (adapter != mShimmerAdapter) {
+            mActualAdapter = adapter;
+        }
+
         super.setAdapter(adapter);
         //如果MRecyclerViewAdapter则设置SpanSizeLookup监听
         if (adapter instanceof MRecyclerViewAdapter) {
@@ -148,7 +192,17 @@ public class MRecyclerView extends RecyclerView {
     private void initRecyclerView() {
         // 设置RecyclerView的布局管理
         mSpanCount = default_spanCount;
-        layoutManager = new GridLayoutManager(getContext(), mSpanCount, mOrientation, false);
+        layoutManager = new GridLayoutManager(getContext(), mSpanCount, mOrientation, false) {
+            @Override
+            public boolean canScrollHorizontally() {
+                return mCanScroll;
+            }
+
+            @Override
+            public boolean canScrollVertically() {
+                return mCanScroll;
+            }
+        };
         setLayoutManager(layoutManager);
 
     }
@@ -186,4 +240,43 @@ public class MRecyclerView extends RecyclerView {
     // ==========================================================================
     // Inner/Nested Classes
     // ==========================================================================
+
+    /**
+     * Sets the demo layout reference
+     *
+     * @param mLayoutReference layout resource id of the layout which should be shown as demo.
+     */
+    public void setDemoLayoutReference(int mLayoutReference) {
+        this.mLayoutReference = mLayoutReference;
+        mShimmerAdapter.setLayoutReference(getLayoutReference());
+    }
+
+    public int getLayoutReference() {
+        return mLayoutReference;
+    }
+
+    /**
+     * Sets the shimmer adapter and shows the loading screen.
+     */
+    public void showShimmerAdapter() {
+        mCanScroll = false;
+        setAdapter(mShimmerAdapter);
+
+    }
+
+    /**
+     * Hides the shimmer adapter
+     */
+    public void hideShimmerAdapter() {
+        mCanScroll = true;
+        setAdapter(mActualAdapter);
+    }
+
+    private int getColor(int id) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return getContext().getColor(id);
+        } else {
+            return getResources().getColor(id);
+        }
+    }
 }
