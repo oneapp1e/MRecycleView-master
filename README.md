@@ -38,14 +38,14 @@
 <dependency>
   <groupId>com.mlr</groupId>
   <artifactId>MRecyclerView</artifactId>
-  <version>1.2.0</version>
+  <version>1.4.0</version>
   <type>pom</type>
 </dependency>
 ```
 2. Gradle
 
 ```
-compile 'com.mlr:MRecyclerView:1.2.0'
+compile 'com.mlr:MRecyclerView:1.4.0'
 ```
 
 ## [具体步骤]
