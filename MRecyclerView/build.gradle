@@ -5,7 +5,7 @@ android {
     buildToolsVersion '26.0.2'
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 19
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
     }
@@ -24,9 +24,9 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:recyclerview-v7:25.4.0'
-    compile 'io.supercharge:shimmerlayout:1.0.2'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:recyclerview-v7:25.3.0'
+    implementation 'io.supercharge:shimmerlayout:1.0.2'
 }
 
 apply from: 'bintrayUpload.gradle'
