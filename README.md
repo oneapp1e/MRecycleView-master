@@ -1,5 +1,5 @@
 # MRecycleView-master
-
+[![](https://jitpack.io/v/oneapp1e/AndroidUtils.svg)](https://jitpack.io/#oneapp1e/AndroidUtils)
 
 > 对RecyclerView的简单封装，具体能做什么？
 - 封装了LayoutManager直接在xml布局中使用一个属性解决
